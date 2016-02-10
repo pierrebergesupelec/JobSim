@@ -1,5 +1,7 @@
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -18,11 +20,12 @@ public class Individu extends Agent{
 	Qualification qualif;
 	double rm;
 	double tl;
+	int moisSansTl;
+	int moisSansEmploi;
 	int x;
 	int y;
 	double z;
 	
-	boolean employed = false;
 	Emploi emploi;
 	
 	protected void setup() {
@@ -39,6 +42,9 @@ public class Individu extends Agent{
 			y = (int) args[4];
 			z = (double) args[5];
 			
+			moisSansTl = 0;
+			moisSansEmploi = 0;
+			
 			// Register "clock" service
 			DFAgentDescription dfd = new DFAgentDescription();
 			dfd.setName(getAID());
@@ -54,7 +60,6 @@ public class Individu extends Agent{
 			}
 			
 			// Add behaviours
-			addBehaviour(new avecEmploi());
 			addBehaviour(new sansEmploi());
 		}
 		else {
@@ -64,31 +69,109 @@ public class Individu extends Agent{
 		}
 	}
 	
-	private class avecEmploi extends CyclicBehaviour {
+	private class avecEmploi extends Behaviour {
+		
+		private boolean terminate = false;
+		
 		public void action() {
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null && msg.getContent().equals("clock")) {
-				// TODO verifier la condition sur le tl et quitter éventuellement
-				System.out.println(myAgent.getLocalName()+": clock reçu");
+				System.out.println(myAgent.getLocalName()+": clock reçu"); //TODO à enlever
+				// Vérifier que l'individu a un emploi
+				if(emploi!=null){
+					// Obtenir le temps libre de ce mois pour cet emploi 
+					double tl_reel = emploi.tlRealisation();
+					// Mettre à jour le nombre de mois avec un temps libre < tl
+					if(tl_reel<tl){
+						moisSansTl ++;
+					}
+					else{
+						moisSansTl = 0;
+					}
+					// Vérifier la condition sur le tl et quitter éventuellement
+					if(moisSansTl>=x){
+						// Ajouter le behaviour demissionner
+						addBehaviour(new Demissionner());
+						// Terminer ce behaviour
+						terminate = true;
+					}
+				}
 			}
 			else {
 				block();
 			}
 		}
+		
+		public boolean done() {
+			return terminate;
+		}
 	}
 	
-	private class sansEmploi extends CyclicBehaviour {
+	private class Demissionner extends Behaviour {
+		private int step = 0;
+		private boolean terminate = false;
+		
 		public void action() {
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
-			ACLMessage msg = myAgent.receive(mt);
-			if (msg != null) {
-				// TODO protocole pour l'acceptation ou non d'un emploi
-				System.out.println(myAgent.getLocalName()+": proposition d'emploi reçu");
+			switch(step){
+			case 0:
+				// Envoie du message
+				ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
+				req.addReceiver(emploi.getEmployeur().getAID());
+				req.setContent("demission");
+				myAgent.send(req);
+				step = 1;
+			case 1:
+				// Reception de la réponse
+				MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CONFIRM), MessageTemplate.MatchPerformative(ACLMessage.FAILURE));
+				ACLMessage msg = myAgent.receive(mt);
+				if(msg.getPerformative()==ACLMessage.CONFIRM){
+					// Terminer ce behaviour
+					terminate = true;
+					// Supprime l'emploi de la mémoire de l'individu
+					emploi = null;
+					// Ce mettre dans le behaviour sansEmploi
+					addBehaviour(new sansEmploi());
+				}
+				else{
+					step = 0;
+				}
+			}
+		}
+		
+		public boolean done() {
+			return terminate;
+		}
+	}
+	
+	private class sansEmploi extends Behaviour {
+		private boolean terminate = false;
+		
+		public void action() {
+			MessageTemplate mt_clock = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+			ACLMessage msg_clock = myAgent.receive(mt_clock);
+			// A chaque pas d'horloge, incrémenter  moisSansEmploi
+			if (msg_clock != null && msg_clock.getContent().equals("clock")) {
+				moisSansEmploi ++;
+				System.out.println(myAgent.getLocalName()+": clock reçu"); //TODO à enlever
+				MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
+				ACLMessage msg = myAgent.receive(mt);
+				if (msg != null) {
+					// TODO protocole pour l'acceptation ou non d'un emploi
+					System.out.println(myAgent.getLocalName()+": proposition d'emploi reçu");
+					// Obtenir l'emploi et passer en behaviour -> avecEmploi
+					// Renvoyer accept proposal
+					// moisSansEmploi = 0;
+					// Etc TODO
+				}
 			}
 			else {
 				block();
 			}
+		}
+		
+		public boolean done() {
+			return terminate;
 		}
 	}
 

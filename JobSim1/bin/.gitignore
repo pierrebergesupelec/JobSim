@@ -9,3 +9,5 @@
 /PoleEmploi.class
 /Individu$avecEmploi.class
 /Individu$sansEmploi.class
+/Etat$PublierEmplois.class
+/Etat$Demission.class

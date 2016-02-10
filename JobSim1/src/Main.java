@@ -18,6 +18,15 @@ public class Main {
 		int nbEmplois1 = 6;
 		int nbEmplois2 = 4;
 		int nbEmplois3 = 3;
+		double r_1 = 1000;
+		double r_2 = 2000;
+		double r_3 = 3000;
+		double e_tl1 = 10;
+		double e_tl2 = 10;
+		double e_tl3 = 10;
+		double e_tl_dev1 = 5;
+		double e_tl_dev2 = 5;
+		double e_tl_dev3 = 5;
 		int x = 3;
 		int y = 10;
 		double z = 0.10;
@@ -35,12 +44,12 @@ public class Main {
 		Profile pMain = new ProfileImpl("localhost",8888,null);
 		AgentContainer mc = rt.createMainContainer(pMain);
 
-		Object[] paramEtat = new Object[]{nbEmplois1 ,nbEmplois2, nbEmplois3, random};
+		AgentController poleEmploi = mc.createNewAgent("poleEmploi", "PoleEmploi", new Object[0]);
+		poleEmploi.start();
+		
+		Object[] paramEtat = new Object[]{nbEmplois1 ,nbEmplois2, nbEmplois3,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3,random,poleEmploi};
 		AgentController etat = mc.createNewAgent("etat", "Etat", paramEtat);
 		etat.start();
-		
-		//AgentController poleEmploi = mc.createNewAgent("poleEmploi", "PoleEmploi", new Object[0]);
-		//poleEmploi.start();
 		
 		for(int i=0; i<nbInitial; i++){
 			int degreQualif = random.nextInt(2);

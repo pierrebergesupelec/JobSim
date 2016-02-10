@@ -1,4 +1,8 @@
 import jade.core.Agent;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 public class Individu extends Agent{
 	
@@ -23,6 +27,25 @@ public class Individu extends Agent{
 			x = (int) args[3];
 			y = (int) args[4];
 			z = (int) args[5];
+			
+			// Register "clock" service
+			DFAgentDescription dfd = new DFAgentDescription();
+			dfd.setName(getAID());
+			ServiceDescription sd = new ServiceDescription();
+			sd.setType("clock");
+			sd.setName("");
+			dfd.addServices(sd);
+			try {
+				DFService.register(this, dfd);
+			}
+			catch (FIPAException fe) {
+				fe.printStackTrace();
+			}
+			
+			// Add behaviours
+			// TODO
+			//addBehaviour(new avecEmploi());
+			//addBehaviour(new sansEmploi());
 		}
 		else {
 			// Make the agent terminate

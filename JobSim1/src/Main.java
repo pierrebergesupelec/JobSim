@@ -39,17 +39,21 @@ public class Main {
 		AgentController etat = mc.createNewAgent("etat", "Etat", paramEtat);
 		etat.start();
 		
-		AgentController poleEmploi = mc.createNewAgent("poleEmploi", "PoleEmploi", new Object[0]);
-		poleEmploi.start();
+		//AgentController poleEmploi = mc.createNewAgent("poleEmploi", "PoleEmploi", new Object[0]);
+		//poleEmploi.start();
 		
 		for(int i=0; i<nbInitial; i++){
 			int qualif = random.nextInt(3 - 1) + 1;
 			double rm = random.nextGaussian()*rm_std_dev[qualif]+rm_mean[qualif];
 			double tl = random.nextGaussian()*tl_std_dev+tl_mean;
-			Object[] paramIndividu = new Object[]{qualif, rm, tl};
+			Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z};
 			AgentController individu = mc.createNewAgent("individu "+i, "Individu", paramIndividu);
 			individu.start();
 		}
+		
+		Object[] paramHorloge = new Object[]{1000};
+		AgentController horloge = mc.createNewAgent("horloge", "Horloge", paramHorloge);
+		horloge.start();
 	}
 
 }

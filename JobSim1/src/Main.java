@@ -43,8 +43,9 @@ public class Main {
 		//poleEmploi.start();
 		
 		for(int i=0; i<nbInitial; i++){
-			int qualif = random.nextInt(3 - 1) + 1;
-			double rm = random.nextGaussian()*rm_std_dev[qualif]+rm_mean[qualif];
+			int degreQualif = random.nextInt(2);
+			Individu.Qualification qualif = Individu.Qualification.values()[degreQualif];
+			double rm = random.nextGaussian()*rm_std_dev[degreQualif]+rm_mean[degreQualif];
 			double tl = random.nextGaussian()*tl_std_dev+tl_mean;
 			Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z};
 			AgentController individu = mc.createNewAgent("individu "+i, "Individu", paramIndividu);

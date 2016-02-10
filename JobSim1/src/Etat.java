@@ -58,7 +58,7 @@ public class Etat extends Agent{
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null && msg.getContent().equals("clock")) {
 				// TODO créer de novueaux emplois
-				System.out.println("clock reçu");
+				System.out.println(myAgent.getLocalName()+": clock reçu");
 			}
 			else {
 				block();

@@ -1,8 +1,11 @@
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 
 public class Individu extends Agent{
 	
@@ -17,12 +20,10 @@ public class Individu extends Agent{
 	double tl;
 	int x;
 	int y;
-	int z;
+	double z;
 	
 	boolean employed = false;
 	Emploi emploi;
-	
-
 	
 	protected void setup() {
 		// Initialisation message
@@ -36,7 +37,7 @@ public class Individu extends Agent{
 			tl = (double) args[2];
 			x = (int) args[3];
 			y = (int) args[4];
-			z = (int) args[5];
+			z = (double) args[5];
 			
 			// Register "clock" service
 			DFAgentDescription dfd = new DFAgentDescription();
@@ -53,14 +54,41 @@ public class Individu extends Agent{
 			}
 			
 			// Add behaviours
-			// TODO
-			//addBehaviour(new avecEmploi());
-			//addBehaviour(new sansEmploi());
+			addBehaviour(new avecEmploi());
+			addBehaviour(new sansEmploi());
 		}
 		else {
 			// Make the agent terminate
 			System.out.println(getAID().getName()+" is not correctly initialised.");
 			doDelete();
+		}
+	}
+	
+	private class avecEmploi extends CyclicBehaviour {
+		public void action() {
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null && msg.getContent().equals("clock")) {
+				// TODO verifier la condition sur le tl et quitter éventuellement
+				System.out.println(myAgent.getLocalName()+": clock reçu");
+			}
+			else {
+				block();
+			}
+		}
+	}
+	
+	private class sansEmploi extends CyclicBehaviour {
+		public void action() {
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				// TODO protocole pour l'acceptation ou non d'un emploi
+				System.out.println(myAgent.getLocalName()+": proposition d'emploi reçu");
+			}
+			else {
+				block();
+			}
 		}
 	}
 

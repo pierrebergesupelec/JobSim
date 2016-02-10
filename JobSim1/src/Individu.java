@@ -6,13 +6,23 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 public class Individu extends Agent{
 	
-	int qualif;
+	public enum Qualification{
+		OUVRIER,
+		TECHNICIEN,
+		CADRE
+	}
+	
+	Qualification qualif;
 	double rm;
 	double tl;
 	int x;
 	int y;
 	int z;
+	
+	boolean employed = false;
 	Emploi emploi;
+	
+
 	
 	protected void setup() {
 		// Initialisation message
@@ -21,7 +31,7 @@ public class Individu extends Agent{
 		// Get the parameters
 		Object[] args = getArguments();
 		if (args != null && args.length == 6) {
-			qualif = (int) args[0];
+			qualif = (Qualification) args[0];
 			rm = (double) args[1];
 			tl = (double) args[2];
 			x = (int) args[3];

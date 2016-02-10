@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
@@ -20,8 +22,8 @@ public class Individu extends Agent{
 	Qualification qualif;
 	double rm;
 	double tl;
-	int moisSansTl;
-	int moisSansEmploi;
+	int moisSansTl;//nombre de mois que l'individu passe sans le temps libre souhaité
+	int moisSansEmploi;//nombre de mois sans emploi
 	int x;
 	int y;
 	double z;
@@ -109,8 +111,8 @@ public class Individu extends Agent{
 	}
 	
 	private class Demissionner extends Behaviour {
-		private int step = 0;
-		private boolean terminate = false;
+		private int step = 0;//en tout 2 étapes : demande et confirmation
+		private boolean terminate = false;//processus de décision terminé
 		
 		public void action() {
 			switch(step){
@@ -154,7 +156,7 @@ public class Individu extends Agent{
 			if (msg_clock != null && msg_clock.getContent().equals("clock")) {
 				moisSansEmploi ++;
 				System.out.println(myAgent.getLocalName()+": clock reÃ§u"); //TODO Ã  enlever
-				MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
+				/*MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
 				ACLMessage msg = myAgent.receive(mt);
 				if (msg != null) {
 					// TODO protocole pour l'acceptation ou non d'un emploi
@@ -163,7 +165,18 @@ public class Individu extends Agent{
 					// Renvoyer accept proposal
 					// moisSansEmploi = 0;
 					// Etc TODO
-				}
+				}*/
+				
+				//pas vraiment d'accord avec ça: le gusse va à poleEmploi pour chercher du taf, pas l'inverse
+				//proposition d'une autre structure
+				addBehaviour(new recevoirOffres());
+				
+				//réception message PoleEmploi
+				//TODO à compléter
+				ArrayList<Emploi> listeEmplois = new ArrayList<Emploi>();//TODO, à mettre la liste reçue par PoleEmploi
+				
+				//choix offre
+				addBehaviour(new choixEmploi(listeEmplois));
 			}
 			else {
 				block();
@@ -178,4 +191,43 @@ public class Individu extends Agent{
 	protected void takeDown() {
 		System.out.println(getAID().getName()+" terminating.");
 	}
+}
+
+class recevoirOffres extends Behaviour{
+	
+	//TODO à compléter
+
+	@Override
+	public void action() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean done() {
+		return true;
+	}
+	
+}
+
+class choixEmploi extends Behaviour{
+	
+	ArrayList<Emploi> liste;
+	
+	choixEmploi(ArrayList<Emploi> liste){
+		this.liste = liste;
+	}
+
+	@Override
+	public void action() {
+		// TODO méthode de choix
+		//je propose un truc de type glouton, dès qu'il trouve un truc satisfaisant il prend
+		//il envoie sa candidature
+	}
+
+	@Override
+	public boolean done() {
+		return true;
+	}
+	
 }

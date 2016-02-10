@@ -34,6 +34,7 @@ public class PoleEmploi extends Agent {
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
+		
 	}
 	
 	protected void takeDown() {

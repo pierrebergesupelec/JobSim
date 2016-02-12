@@ -1,9 +1,6 @@
-import java.util.ArrayList;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -19,7 +16,7 @@ public class Individu extends Agent{
 		CADRE
 	}
 	
-	Qualification qualif;
+	public Qualification qualif;
 	double rm;
 	double tl;
 	int moisSansTl;//nombre de mois que l'individu passe sans le temps libre souhait�

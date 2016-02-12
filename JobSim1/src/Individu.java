@@ -51,6 +51,11 @@ public class Individu extends Agent{
 			sd.setType("clock");
 			sd.setName("");
 			dfd.addServices(sd);
+			// Register "worker" service
+			ServiceDescription sd2 = new ServiceDescription();
+			sd2.setType("worker");
+			sd2.setName("");
+			dfd.addServices(sd2);
 			try {
 				DFService.register(this, dfd);
 			}

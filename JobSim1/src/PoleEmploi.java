@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -57,14 +58,31 @@ public class PoleEmploi extends Agent {
 				Individu.Qualification qualif = e.getQualif();
 				String revenu = "" + e.getRevenu();
 				
-				//on peut fixer le fait que, par nature, PoleEmploi envoie l'offre à tous les travailleurs de même qualification
+				//Message envoyé
 				ACLMessage msg = new ACLMessage(ACLMessage.CFP);
-				//TODO : aller chercher la liste des travailleurs
-				Agent[] travailleurs = new Agent[0];//là, on envoie rien
-				for (int i = 0; i < travailleurs.length; ++i) {
-					Individu a = (Individu) travailleurs[i];
-					if (a.qualif.equals(qualif)) msg.addReceiver(travailleurs[i].getAID());
+
+				//liste de destinataires : tous les travailleurs
+				AID[] travailleurs = new AID[0];
+				DFAgentDescription template = new DFAgentDescription();
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType("worker");
+				template.addServices(sd);
+				try {
+					DFAgentDescription[] result = DFService.search(myAgent, template);
+					travailleurs = new AID[result.length];
+					for (int i = 0; i < result.length; ++i) {
+						travailleurs[i] = result[i].getName();
+					}
 				}
+				catch (FIPAException fe) {
+				fe.printStackTrace();
+				}
+				
+				//ajout des destinataires à l'envoi du message
+				for (int i = 0; i < travailleurs.length; ++i) {
+					msg.addReceiver(travailleurs[i]);// est-ce que ça marche, si on met l'AID et pas l'agent ??
+				}
+				
 				//Envoi des informations relatives à l'emploi
 				msg.setContent(revenu);
 				myAgent.send(msg);

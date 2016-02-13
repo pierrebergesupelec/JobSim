@@ -163,6 +163,14 @@ public class Individu extends Agent{
 				if (msg != null) {
 					// TODO protocole pour l'acceptation ou non d'un emploi
 					System.out.println(myAgent.getLocalName()+": proposition d'emploi reÃ§u");
+					
+					//réponse à l'offre reçu
+					int revenu = Integer.parseInt(msg.getContent());
+					if (revenu > rm && emploi==null){
+						ACLMessage answer = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+						answer.addReceiver(msg.getSender());
+						myAgent.send(answer);
+					}
 					// Obtenir l'emploi et passer en behaviour -> avecEmploi
 					// Renvoyer accept proposal
 					// moisSansEmploi = 0;

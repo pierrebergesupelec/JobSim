@@ -51,15 +51,17 @@ public class PoleEmploi extends Agent {
 
 		@Override
 		public void action() {
+			
+			int index = 0;
 			//on agit à condition qu'il y ait des emplois en attente
-			if (attente.size() > 0){
+			while (index < attente.size()){
 				//Infos relatives à l'emploi en tête de liste
-				Emploi e = attente.get(0);
+				Emploi e = attente.get(index);
 				Individu.Qualification qualif = e.getQualif();
 				String revenu = "" + e.getRevenu();
 				
 				//Message envoyé
-				ACLMessage msg = new ACLMessage(ACLMessage.CFP);
+				ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 
 				//liste de destinataires : tous les travailleurs
 				AID[] travailleurs = new AID[0];
@@ -78,10 +80,13 @@ public class PoleEmploi extends Agent {
 				fe.printStackTrace();
 				}
 				
-				//ajout des destinataires à l'envoi du message
-				for (int i = 0; i < travailleurs.length; ++i) {
-					msg.addReceiver(travailleurs[i]);// est-ce que ça marche, si on met l'AID et pas l'agent ??
-				}
+				//choix d'un destinataire 
+				//TODO ce serait mieux si on faisait un présélection des agents (chomeurs + qualification correcte)
+				//TODO il faut aussi stocker le fait qu'on a envoyé tel emploi à telle personne
+				//pour se souvenir quel emploi a accepté l'individu
+				int i = (int) (Math.random()*travailleurs.length);
+				msg.addReceiver(travailleurs[i]);
+				
 				
 				//Envoi des informations relatives à l'emploi
 				msg.setContent(revenu);

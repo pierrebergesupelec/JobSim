@@ -22,6 +22,16 @@ public class Emploi {
 		qualif = q;
 	}
 	
+	//copie constructeur
+	public Emploi(Emploi e){
+		revenu = e.getRevenu();
+		tl_reel = e.tl_reel;
+		tl_std_dev = e.tl_std_dev;
+		random = e.random;
+		employeur = e.getEmployeur();
+		qualif = e.getQualif();
+	}
+	
 	public double getRevenu(){
 		return revenu;
 	}

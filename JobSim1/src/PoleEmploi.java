@@ -2,18 +2,21 @@ import java.util.ArrayList;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 
 
 public class PoleEmploi extends Agent {
 	
 	ArrayList<Emploi> pourvus;
 	ArrayList<Emploi> attente;
+	int step = 0;
 	
 	protected void setup() {
 		// Initialisation message
@@ -47,52 +50,84 @@ public class PoleEmploi extends Agent {
 	
 	
 	//PoleEmploi s'occupe de donner les emplois en attente à des travailleurs
-	private class donnerEmploi extends CyclicBehaviour{
+	private class donnerEmploi extends Behaviour{
 
 		@Override
 		public void action() {
-			
 			int index = 0;
+			MessageTemplate mt = null; // Template pour réception des messages
+			
 			//on agit à condition qu'il y ait des emplois en attente
 			while (index < attente.size()){
-				//Infos relatives à l'emploi en tête de liste
-				Emploi e = attente.get(index);
-				Individu.Qualification qualif = e.getQualif();
-				String revenu = "" + e.getRevenu();
-				
-				//Message envoyé
-				ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
+				switch (step){
+				case 0:
+					//Infos relatives à l'emploi en tête de liste
+					Emploi e = attente.get(index);
+					Individu.Qualification qualif = e.getQualif();
+					String revenu = "" + e.getRevenu();
+					
+					//Message envoyé
+					ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 
-				//liste de destinataires : tous les travailleurs
-				AID[] travailleurs = new AID[0];
-				DFAgentDescription template = new DFAgentDescription();
-				ServiceDescription sd = new ServiceDescription();
-				sd.setType("worker");
-				template.addServices(sd);
-				try {
-					DFAgentDescription[] result = DFService.search(myAgent, template);
-					travailleurs = new AID[result.length];
-					for (int i = 0; i < result.length; ++i) {
-						travailleurs[i] = result[i].getName();
+					//liste de destinataires : tous les travailleurs
+					AID[] travailleurs = new AID[0];
+					DFAgentDescription template = new DFAgentDescription();
+					ServiceDescription sd = new ServiceDescription();
+					sd.setType("worker");
+					template.addServices(sd);
+					try {
+						DFAgentDescription[] result = DFService.search(myAgent, template);
+						travailleurs = new AID[result.length];
+						for (int i = 0; i < result.length; ++i) {
+							travailleurs[i] = result[i].getName();
+						}
 					}
+					catch (FIPAException fe) {
+					fe.printStackTrace();
+					}
+					
+					//choix d'un destinataire 
+					//TODO ce serait mieux si on faisait un présélection des agents (chomeurs + qualification correcte)
+					//TODO il faut aussi stocker le fait qu'on a envoyé tel emploi à telle personne
+					//pour se souvenir quel emploi a accepté l'individu
+					int i = (int) (Math.random()*travailleurs.length);
+					msg.addReceiver(travailleurs[i]);
+					
+					
+					//Envoi des informations relatives à l'emploi
+					msg.setContent(revenu);
+					myAgent.send(msg);
+					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("jobOffer"),
+							 MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
+
+					step = 1;
+					break;
+				case 1:
+					ACLMessage reply = myAgent.receive(mt);
+					 if (reply != null) {
+						 //réponse du travailleur
+						 if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+							 Emploi copy = new Emploi(attente.get(index));
+							 // TODO copy.employe = 
+							 pourvus.add(copy);
+							 attente.remove(0);
+						 }
+						 step = 2;
+					 } else {
+						 block();
+					 }
+
 				}
-				catch (FIPAException fe) {
-				fe.printStackTrace();
-				}
-				
-				//choix d'un destinataire 
-				//TODO ce serait mieux si on faisait un présélection des agents (chomeurs + qualification correcte)
-				//TODO il faut aussi stocker le fait qu'on a envoyé tel emploi à telle personne
-				//pour se souvenir quel emploi a accepté l'individu
-				int i = (int) (Math.random()*travailleurs.length);
-				msg.addReceiver(travailleurs[i]);
 				
 				
-				//Envoi des informations relatives à l'emploi
-				msg.setContent(revenu);
-				myAgent.send(msg);
+				
 				
 			}
+		}
+
+		@Override
+		public boolean done() {
+			return (step == 2);
 		}
 		
 	}

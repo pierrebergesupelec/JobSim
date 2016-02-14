@@ -170,11 +170,10 @@ public class Individu extends Agent{
 						ACLMessage answer = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 						answer.addReceiver(msg.getSender());
 						myAgent.send(answer);
+						moisSansEmploi = 0;
+						// TODO emploi = ?
 					}
-					// Obtenir l'emploi et passer en behaviour -> avecEmploi
-					// Renvoyer accept proposal
-					// moisSansEmploi = 0;
-					// Etc TODO
+					
 				}
 			}
 			else {

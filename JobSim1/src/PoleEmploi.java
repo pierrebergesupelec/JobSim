@@ -108,7 +108,7 @@ public class PoleEmploi extends Agent {
 						 //réponse du travailleur
 						 if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
 							 Emploi copy = new Emploi(attente.get(index));
-							 // TODO copy.employe = 
+							 copy.setEmploye(reply.getSender());
 							 pourvus.add(copy);
 							 attente.remove(0);
 						 }

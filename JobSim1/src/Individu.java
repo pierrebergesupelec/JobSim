@@ -81,7 +81,6 @@ public class Individu extends Agent{
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null && msg.getContent().equals("clock")) {
-				System.out.println(myAgent.getLocalName()+": clock reçu"); //TODO à enlever
 				// Vérifier que l'individu a un emploi
 				if(emploi!=null){
 					// Obtenir le temps libre de ce mois pour cet emploi 
@@ -157,11 +156,10 @@ public class Individu extends Agent{
 			// A chaque pas d'horloge, incrémenter  moisSansEmploi
 			if (msg_clock != null && msg_clock.getContent().equals("clock")) {
 				moisSansEmploi ++;
-				System.out.println(myAgent.getLocalName()+": clock reçu"); //TODO à enlever
 				MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
 				ACLMessage msg = myAgent.receive(mt);
 				if (msg != null) {
-					// TODO protocole pour l'acceptation ou non d'un emploi
+					//protocole pour l'acceptation ou non d'un emploi
 					System.out.println(myAgent.getLocalName()+": proposition d'emploi reçu");
 					
 					//r�ponse � l'offre re�u

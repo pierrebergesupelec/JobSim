@@ -1,5 +1,6 @@
 import java.util.Random;
 
+import jade.core.AID;
 import jade.core.Agent;
 
 public class Emploi {
@@ -10,7 +11,7 @@ public class Emploi {
 	private Random random;
 	
 	private Agent employeur;
-	private Agent employe;
+	private AID employe;
 	private Individu.Qualification qualif;
 	
 	public Emploi(double r, double tl, double tl_dev, Random rand, Agent empl, Individu.Qualification q){
@@ -48,11 +49,11 @@ public class Emploi {
 		return qualif;
 	}
 
-	public Agent getEmploye() {
+	public AID getEmploye() {
 		return employe;
 	}
 
-	public void setEmploye(Agent employe) {
+	public void setEmploye(AID employe) {
 		this.employe = employe;
 	}
 	

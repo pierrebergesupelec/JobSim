@@ -44,6 +44,7 @@ public class Main {
 		Profile pMain = new ProfileImpl("localhost",8888,null);
 		AgentContainer mc = rt.createMainContainer(pMain);
 
+		//TODO création des emplois initiaux!
 		AgentController poleEmploi = mc.createNewAgent("poleEmploi", "PoleEmploi", new Object[0]);
 		poleEmploi.start();
 		

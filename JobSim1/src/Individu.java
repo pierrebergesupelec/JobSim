@@ -20,7 +20,7 @@ public class Individu extends Agent{
 	}
 	
 	public Qualification qualif;
-	double rm;// <= 4 chiffres (pour l'instant)
+	double rm;
 	double tl;
 	int moisSansTl;//nombre de mois que l'individu passe sans le temps libre souhait�
 	int moisSansEmploi;//nombre de mois sans emploi

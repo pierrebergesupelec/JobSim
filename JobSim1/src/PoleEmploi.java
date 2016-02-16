@@ -25,8 +25,12 @@ public class PoleEmploi extends Agent {
 		System.out.println("Pole Emploi "+getAID().getName()+" is ready.");
 
 		// Initialisation liste d'emplois
-		ArrayList<Emploi> pourvus = new ArrayList<Emploi>();
-		ArrayList<Emploi> attente = new ArrayList<Emploi>();
+		pourvus = new ArrayList<Emploi>();
+		// Get the parameters
+		Object[] args = getArguments();
+		if (args != null && args.length == 1) {
+			attente = (ArrayList<Emploi>) args[0];
+		}
 		
 		// Register "clock" service
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -50,7 +54,6 @@ public class PoleEmploi extends Agent {
 		System.out.println("Pole Emploi "+getAID().getName()+" terminating.");
 	}
 	
-	
 	//PoleEmploi s'occupe de donner les emplois en attente à des travailleurs
 	private class donnerEmploi extends Behaviour{
 
@@ -60,16 +63,13 @@ public class PoleEmploi extends Agent {
 			MessageTemplate mt = null; // Template pour réception des messages
 			
 			//on agit à condition qu'il y ait des emplois en attente
-			while (index < attente.size()){
+			while (attente.size() > 0){
 				switch (step){
 				case 0:
 					//Infos relatives à l'emploi en tête de liste
 					Emploi e = attente.get(index);
 					Individu.Qualification qualif = e.getQualif();
 					String revenu = "" + e.getRevenu();
-					if (e.getRevenu() < 1000 && e.getRevenu() >= 100) {//cas 3 ou 4 chiffres
-						revenu = "0" + e.getRevenu();
-					}
 					String tl_reel = "" + e.getTl();
 					String tl_std_dev = "" + e.getTlDev();
 					AID employeur = e.getEmployeur();

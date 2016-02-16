@@ -60,5 +60,13 @@ public class Emploi {
 	public boolean estPourvu(){
 		return getEmploye()!=null;
 	}
+	
+	public double getTl(){
+		return tl_reel;
+	}
+	
+	public double getTlDev(){
+		return tl_std_dev;
+	}
 
 }

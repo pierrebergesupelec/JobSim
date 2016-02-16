@@ -1,4 +1,7 @@
 
+import java.util.Random;
+
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
@@ -17,7 +20,7 @@ public class Individu extends Agent{
 	}
 	
 	public Qualification qualif;
-	double rm;
+	double rm;// <= 4 chiffres (pour l'instant)
 	double tl;
 	int moisSansTl;//nombre de mois que l'individu passe sans le temps libre souhaitï¿½
 	int moisSansEmploi;//nombre de mois sans emploi
@@ -163,19 +166,50 @@ public class Individu extends Agent{
 					System.out.println(myAgent.getLocalName()+": proposition d'emploi recu");
 					
 					//réponse à l'offre reçu
-					
-					//l'individu possède-t-il la bonne qualification ?
-					boolean goodQualif = msg.getContent().startsWith(qualif.name());
-					//extraction du revenu
-					msg.getContent().replaceAll("\\D+","");//enleve les lettres
-					int revenu = Integer.parseInt(msg.getContent());//extrait int
-					//conditions pour un réponse positive
-					if (emploi==null && goodQualif && revenu > rm){
-						ACLMessage answer = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-						answer.addReceiver(msg.getSender());
-						myAgent.send(answer);
-						moisSansEmploi = 0;
-						//TODO définir nouvel emploi, plus de PJ ?
+					if (emploi == null){//condition 1: inactif
+						String s = msg.getContent();
+						//extraction qualification
+						s.replaceFirst("qualif ","");
+						boolean goodQualif =  s.charAt(0)==qualif.name().charAt(0); //pas besoin de vérifier tout le mot, juste la première lettre
+						if (goodQualif){//condition 2: bonne qualification
+							s.replaceFirst(qualif.name() + ", ", "");
+							//extraction du revenu
+							s.replaceFirst("revenu ","");
+							int temp = s.lastIndexOf(", tl_reel");
+							String revenu_str = s.substring(0, temp-1);
+							int revenu = Integer.parseInt(revenu_str);
+							if (revenu > rm){
+								//extraction dernières infos
+								s.replaceFirst(revenu_str + ", ","");
+								s.replaceFirst("tl_reel ","");
+								temp = s.lastIndexOf(", tl_std_dev");
+								String tl_reel_str = s.substring(0, temp-1);
+								int tl_reel = Integer.parseInt(tl_reel_str);//extraction tl_reel
+								s.replaceFirst(tl_reel_str + ", ","");
+								s.replaceFirst("tl_std_dev ","");
+								temp = s.lastIndexOf(", employeur");
+								String tl_std_dev_str = s.substring(0, temp-1);
+								int tl_std_dev = Integer.parseInt(tl_reel_str);//extraction tl_std_dev
+								s.replaceFirst(tl_std_dev_str + ", ","");
+								s.replaceFirst("employeur ","");
+								String employeur = s;//extraction tl_reel
+								
+								//envoi réponse
+								ACLMessage answer = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+								answer.addReceiver(msg.getSender());
+								myAgent.send(answer);
+								moisSansEmploi = 0;
+								emploi = new Emploi(revenu, tl_reel, tl_std_dev, new Random(), null,qualif);//TODO stocker employeur
+							} else {
+								ACLMessage answer = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+								answer.addReceiver(msg.getSender());
+								myAgent.send(answer);
+							}
+						} else {
+							ACLMessage answer = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+							answer.addReceiver(msg.getSender());
+							myAgent.send(answer);
+						}
 					} else {
 						ACLMessage answer = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
 						answer.addReceiver(msg.getSender());

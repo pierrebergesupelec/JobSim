@@ -67,6 +67,12 @@ public class PoleEmploi extends Agent {
 					Emploi e = attente.get(index);
 					Individu.Qualification qualif = e.getQualif();
 					String revenu = "" + e.getRevenu();
+					if (e.getRevenu() < 1000 && e.getRevenu() >= 100) {//cas 3 ou 4 chiffres
+						revenu = "0" + e.getRevenu();
+					}
+					String tl_reel = "" + e.getTl();
+					String tl_std_dev = "" + e.getTlDev();
+					AID employeur = e.getEmployeur();
 					
 					//Message envoyé
 					ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
@@ -96,7 +102,12 @@ public class PoleEmploi extends Agent {
 					System.out.println("Pole Emploi envoie une proposition d'emploi à " + travailleurs[i].getName());
 					
 					//Envoi des informations relatives à l'emploi
-					msg.setContent(qualif.name() + revenu);//qualification et revenu : OUVRIER1200
+					msg.setContent("qualif " + qualif.name() 
+							+ ", revenu " +  revenu 
+							+ ", tl_reel " +  tl_reel 
+							+ ", tl_std_dev " +  tl_std_dev
+							+ ", employeur " +  employeur.getName());
+					//ex. qualif OUVRIER, revenu 1200, tl_reel 20.7, tl_std_dev 1.5, employeur Etat
 					myAgent.send(msg);
 					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("jobOffer"),
 							 MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
@@ -132,7 +143,6 @@ public class PoleEmploi extends Agent {
 
 		@Override
 		public boolean done() {
-			System.out.println("Emploi accepté");
 			return (step == 2);
 		}
 		

@@ -120,7 +120,7 @@ public class Individu extends Agent{
 			case 0:
 				// Envoie du message
 				ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
-				req.addReceiver(emploi.getEmployeur().getAID());
+				req.addReceiver(emploi.getEmployeur());
 				req.setContent("demission");
 				myAgent.send(req);
 				step = 1;
@@ -160,16 +160,26 @@ public class Individu extends Agent{
 				ACLMessage msg = myAgent.receive(mt);
 				if (msg != null) {
 					//protocole pour l'acceptation ou non d'un emploi
-					System.out.println(myAgent.getLocalName()+": proposition d'emploi reÃ§u");
+					System.out.println(myAgent.getLocalName()+": proposition d'emploi recu");
 					
 					//réponse à l'offre reçu
-					int revenu = Integer.parseInt(msg.getContent());
-					if (revenu > rm && emploi==null){
+					
+					//l'individu possède-t-il la bonne qualification ?
+					boolean goodQualif = msg.getContent().startsWith(qualif.name());
+					//extraction du revenu
+					msg.getContent().replaceAll("\\D+","");//enleve les lettres
+					int revenu = Integer.parseInt(msg.getContent());//extrait int
+					//conditions pour un réponse positive
+					if (emploi==null && goodQualif && revenu > rm){
 						ACLMessage answer = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 						answer.addReceiver(msg.getSender());
 						myAgent.send(answer);
 						moisSansEmploi = 0;
-						// TODO emploi = ?
+						//TODO définir nouvel emploi, plus de PJ ?
+					} else {
+						ACLMessage answer = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+						answer.addReceiver(msg.getSender());
+						myAgent.send(answer);
 					}
 					
 				}

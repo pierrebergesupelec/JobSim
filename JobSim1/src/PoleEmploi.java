@@ -96,7 +96,7 @@ public class PoleEmploi extends Agent {
 					System.out.println("Pole Emploi envoie une proposition d'emploi à " + travailleurs[i].getName());
 					
 					//Envoi des informations relatives à l'emploi
-					msg.setContent(qualif.name() + " " + revenu);//qualification et revenu : OUVRIER 1200
+					msg.setContent(qualif.name() + revenu);//qualification et revenu : OUVRIER1200
 					myAgent.send(msg);
 					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("jobOffer"),
 							 MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
@@ -113,7 +113,8 @@ public class PoleEmploi extends Agent {
 							 pourvus.add(copy);
 							 attente.remove(0);
 							 step = 2;
-						 } else {
+						 }
+						 if (reply.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
 							 step = 0;
 						 }
 						 

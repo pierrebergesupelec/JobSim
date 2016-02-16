@@ -10,11 +10,11 @@ public class Emploi {
 	private double tl_std_dev;
 	private Random random;
 	
-	private Agent employeur;
+	private AID employeur;
 	private AID employe;
 	private Individu.Qualification qualif;
 	
-	public Emploi(double r, double tl, double tl_dev, Random rand, Agent empl, Individu.Qualification q){
+	public Emploi(double r, double tl, double tl_dev, Random rand, AID empl, Individu.Qualification q){
 		revenu = r;
 		tl_reel = tl;
 		tl_std_dev = tl_dev;
@@ -41,7 +41,7 @@ public class Emploi {
 		return random.nextGaussian()*tl_std_dev+tl_reel;
 	}
 
-	public Agent getEmployeur() {
+	public AID getEmployeur() {
 		return employeur;
 	}
 

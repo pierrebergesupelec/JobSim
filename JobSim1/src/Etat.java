@@ -93,6 +93,7 @@ public class Etat extends Agent{
 		@Override
 		public void action() {
 			for(Emploi e : emplois){
+				System.out.println("Etat"+e);
 				// Message
 				ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 
@@ -126,17 +127,18 @@ public class Etat extends Agent{
 	private class Demission extends CyclicBehaviour {
 		
 		public void action() {
-			// GÈrer le protocole de d√©mission
+			// G√©rer le protocole de d√©mission
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null && msg.getContent().equals("demission")) {
-				// GÈrer la dÈmission
-				System.out.println(myAgent.getLocalName()+": demission reÁue");
+				// G√©rer la d√©mission
+				System.out.println(myAgent.getLocalName()+": demission re√ßue");
 				
 				Emploi e = null;
 				boolean found = false;
 				// Chercher l'emploi correspondant
 				for(Emploi tmp : emplois){
+					System.out.println(tmp.getEmploye()+" / "+msg.getSender());
 					if(tmp.getEmploye()==msg.getSender()){
 						found = true;
 						e = tmp;
@@ -145,7 +147,7 @@ public class Etat extends Agent{
 				}
 				
 				if(found){
-					// RÈpondre par une confirmation
+					// R√©pondre par une confirmation
 					ACLMessage reply = msg.createReply();
 					reply.setPerformative(ACLMessage.CONFIRM);
 					reply.setContent("demission");
@@ -179,8 +181,8 @@ public class Etat extends Agent{
 					myAgent.send(newJob);
 				}
 				else{
-					// RÈpondre par une erreur
-					System.err.println("Erreur dans le protocole de dÈmission!!");
+					// R√©pondre par une erreur
+					System.err.println("Erreur dans le protocole de d√©mission!!");
 					ACLMessage reply = msg.createReply();
 					reply.setPerformative(ACLMessage.FAILURE);
 					reply.setContent("demission");

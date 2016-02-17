@@ -24,7 +24,7 @@ public class Individu extends Agent{
 	public Qualification qualif;
 	double rm;
 	double tl;
-	int moisSansTl;//nombre de mois que l'individu passe sans le temps libre souhaitï¿½
+	int moisSansTl;//nombre de mois que l'individu passe sans le temps libre souhaitÃ©
 	int moisSansEmploi;//nombre de mois sans emploi
 	int x;
 	int y;
@@ -93,7 +93,6 @@ public class Individu extends Agent{
 			if (msg != null && msg.getContent().equals("clock")) {
 				// VÃ©rifier que l'individu a un emploi
 				if(emploi!=null){
-					System.out.println(myAgent.getAID().getName() + " Un mois de travail en plus");
 					// Obtenir le temps libre de ce mois pour cet emploi 
 					double tl_reel = emploi.tlRealisation();
 					// Mettre Ã  jour le nombre de mois avec un temps libre < tl
@@ -110,6 +109,7 @@ public class Individu extends Agent{
 						// Terminer ce behaviour
 						terminate = true;
 					}
+					System.out.println(myAgent.getAID().getName() + " Un mois de travail en plus: tlreel="+tl_reel+", tlindiv="+tl+", moisSansTl="+moisSansTl);
 				}
 			}
 			else {
@@ -124,7 +124,7 @@ public class Individu extends Agent{
 	
 	private class Demissionner extends Behaviour {
 		private int step = 0;//en tout 2 etapes : demande et confirmation
-		private boolean terminate = false;//processus de dï¿½cision terminï¿½
+		private boolean terminate = false;//processus de dÃ©cision terminÃ©
 		
 		public void action() {
 			switch(step){
@@ -143,7 +143,7 @@ public class Individu extends Agent{
 					if(msg.getPerformative()==ACLMessage.CONFIRM){
 						// Terminer ce behaviour
 						terminate = true;
-						// Supprime l'emploi de la mémoire de l'individu
+						// Supprime l'emploi de la mÃ©moire de l'individu
 						emploi = null;
 						// Se mettre dans le behaviour sansEmploi
 						addBehaviour(new sansEmploi());
@@ -173,7 +173,7 @@ public class Individu extends Agent{
 			// Proposition d'emploi msg
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
 			ACLMessage msg = myAgent.receive(mt);
-			// A chaque pas d'horloge, incrémenter  moisSansEmploi
+			// A chaque pas d'horloge, incrÃ©menter  moisSansEmploi
 			if (msg_clock != null && msg_clock.getContent().equals("clock")) {
 				moisSansEmploi ++;
 			} else
@@ -182,7 +182,7 @@ public class Individu extends Agent{
 						//protocole pour l'acceptation ou non d'un emploi
 						System.out.println(myAgent.getLocalName()+": proposition d'emploi recu");
 
-						//réponse à l'offre reçu
+						//rÃ©ponse Ã© l'offre reÃ§u
 						if (emploi == null){//condition 1: inactif
 							Emploi e;
 							try {
@@ -190,21 +190,22 @@ public class Individu extends Agent{
 								boolean goodQualif = e.getQualif() == qualif;
 								System.out.println(e.getQualif()+" "+qualif+" "+e.getRevenu()+" "+rm);
 								if (goodQualif && e.getRevenu()>=rm){
-									System.out.println(myAgent.getLocalName()+": emploi accepté");
-									//envoi réponse
+									System.out.println(myAgent.getLocalName()+": emploi acceptÃ©");
+									//envoi rÃ©ponse
 									ACLMessage answer = msg.createReply();
 									answer.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
 									answer.setContentObject(e);
 									myAgent.send(answer);
 									moisSansEmploi = 0;
 									emploi = e;
+									emploi.setEmploye(getAID());
 									// Ajouter le behaviour avecEmploi
 									addBehaviour(new avecEmploi());
 									// Terminer ce behaviour
 									terminate = true;
 								}
 								else {
-									System.out.println(myAgent.getLocalName()+": emploi refusé");
+									System.out.println(myAgent.getLocalName()+": emploi refusÃ©");
 									ACLMessage answer = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
 									answer.addReceiver(msg.getSender());
 									myAgent.send(answer);
@@ -214,7 +215,7 @@ public class Individu extends Agent{
 							}
 
 						} else {
-							System.out.println(myAgent.getLocalName()+": emploi refusé");
+							System.out.println(myAgent.getLocalName()+": emploi refusÃ©");
 							ACLMessage answer = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
 							answer.addReceiver(msg.getSender());
 							myAgent.send(answer);

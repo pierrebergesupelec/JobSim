@@ -50,27 +50,27 @@ public class PoleEmploi extends Agent {
 		System.out.println("Pole Emploi "+getAID().getName()+" terminating.");
 	}
 	
-	//PoleEmploi s'occupe de donner les emplois en attente à des travailleurs
+	//PoleEmploi s'occupe de donner les emplois en attente Ã© des travailleurs
 	/* TODO delete
 	private class donnerEmploi extends CyclicBehaviour{
 
 		int step = 0;
-		int nb_tentatives = 0;//nombre de fois où on essaie de donner un emploi
+		int nb_tentatives = 0;//nombre de fois oÃ© on essaie de donner un emploi
 		
 		@Override
 		public void action() {
 			
 			int index = 0;
-			MessageTemplate mt = null; // Template pour réception des messages
+			MessageTemplate mt = null; // Template pour rÃ©ception des messages
 
-			//on agit à condition qu'il y ait des emplois en attente
+			//on agit Ã© condition qu'il y ait des emplois en attente
 			while (attente.size() > 0 && nb_tentatives < 100){
 				switch (step){
 				case 0:
-					//Emploi à traiter
+					//Emploi Ã© traiter
 					Emploi e = attente.get(index);
 					
-					//Message envoyé
+					//Message envoyÃ©
 					ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 
 					//liste de destinataires : tous les travailleurs avec la bonne qualification
@@ -94,9 +94,9 @@ public class PoleEmploi extends Agent {
 					int i = (int) (Math.random()*travailleurs.length);
 					enCours = travailleurs[i];
 					msg.addReceiver(travailleurs[i]);
-					System.out.println("Pole Emploi envoie une proposition d'emploi à " + travailleurs[i].getName());
+					System.out.println("Pole Emploi envoie une proposition d'emploi Ã© " + travailleurs[i].getName());
 					
-					//Envoi des informations relatives à l'emploi
+					//Envoi des informations relatives Ã© l'emploi
 					try {
 						msg.setContentObject(e);// PJ
 					} catch (IOException e1) {
@@ -110,7 +110,7 @@ public class PoleEmploi extends Agent {
 				case 1:
 					ACLMessage reply = myAgent.receive(mt);
 					 if (reply != null) {
-						 //réponse du travailleur
+						 //rÃ©ponse du travailleur
 						 if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
 							 Emploi copy = new Emploi(attente.get(index));
 							 copy.setEmploye(reply.getSender());
@@ -139,10 +139,10 @@ public class PoleEmploi extends Agent {
 		public void action() {
 			ACLMessage msg = myAgent.receive();
 			 if (msg != null) {
-				 // msg de démission
+				 // msg de dÃ©mission
 				 if (msg.getPerformative() == ACLMessage.INFORM) {
 					 try {
-						attente.add(new Emploi((Emploi)msg.getContentObject()));
+						attente.add((Emploi)msg.getContentObject());
 						pourvus.remove((Emploi)msg.getContentObject());
 					 } catch (UnreadableException e) {
 						 e.printStackTrace();
@@ -153,6 +153,7 @@ public class PoleEmploi extends Agent {
 					 Emploi e;
 					 try {
 						 e = (Emploi)msg.getContentObject();
+						 System.out.println("maj: "+e);
 						 if(!pourvus.contains(e) && !attente.contains(e)){
 							 attente.add(e);
 							 addBehaviour(new donnerEmploi(e));
@@ -168,12 +169,12 @@ public class PoleEmploi extends Agent {
 		}
 	}
 	
-	//PoleEmploi s'occupe de donne l'emplois en attente à un travailleur
+	//PoleEmploi s'occupe de donne l'emplois en attente Ã© un travailleur
 	private class donnerEmploi extends Behaviour{
 
 		private boolean terminate = false;
 		int step = 0;
-		Emploi e = null;	//Emploi à traiter
+		Emploi e = null;	//Emploi Ã© traiter
 		
 		public donnerEmploi(Emploi emploi){
 			e = emploi;
@@ -182,11 +183,11 @@ public class PoleEmploi extends Agent {
 		@Override
 		public void action() {
 			
-			MessageTemplate mt = null; // Template pour réception des messages
+			MessageTemplate mt = null; // Template pour rÃ©ception des messages
 
 			switch (step){
 			case 0:
-				//Message envoyé
+				//Message envoyÃ©
 				ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 
 				//liste de destinataires : tous les travailleurs avec la bonne qualification
@@ -210,9 +211,9 @@ public class PoleEmploi extends Agent {
 					//choix d'un destinataire au pif
 					int i = (int) (Math.random()*travailleurs.length);
 					msg.addReceiver(travailleurs[i]);
-					System.out.println("Pole Emploi envoie une proposition d'emploi à " + travailleurs[i].getName());
+					System.out.println("Pole Emploi envoie une proposition d'emploi Ã  " + travailleurs[i].getName());
 
-					//Envoi des informations relatives à l'emploi
+					//Envoi des informations relatives Ã© l'emploi
 					try {
 						msg.setContentObject(e);// PJ
 					} catch (IOException e1) {
@@ -227,7 +228,7 @@ public class PoleEmploi extends Agent {
 				ACLMessage reply = myAgent.receive(mt);
 				try {
 					if (reply != null && reply.getContentObject()==e) {
-						// réponse du travailleur
+						// rÃ©ponse du travailleur
 						if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
 							e.setEmploye(reply.getSender());
 							pourvus.add(e);

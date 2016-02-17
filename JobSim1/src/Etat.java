@@ -1,6 +1,8 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
@@ -27,7 +29,6 @@ public class Etat extends Agent{
 	double tl_dev3;
 	ArrayList<Emploi> emplois;
 	Random random;
-	PoleEmploi poleEmploi;
 
 	protected void setup() {
 		// Initialisation message
@@ -35,7 +36,7 @@ public class Etat extends Agent{
 
 		// Get the parameters
 		Object[] args = getArguments();
-		if (args != null && args.length == 14) {
+		if (args != null && args.length == 13) {
 			nbEmplois1 = (int) args[0];
 			nbEmplois2 = (int) args[1];
 			nbEmplois3 = (int) args[2];
@@ -49,7 +50,6 @@ public class Etat extends Agent{
 			tl_dev2 = (double) args[10];
 			tl_dev3 = (double) args[11];
 			random = (Random) args[12];
-			poleEmploi = (PoleEmploi) args[13];
 			
 			// Cr√©er les emplois
 			emplois = new ArrayList<Emploi>();
@@ -63,20 +63,11 @@ public class Etat extends Agent{
 				emplois.add(new Emploi(r3,tl3,tl_dev3,random,this.getAID(),Individu.Qualification.CADRE));
 			}
 			
-			// Publier les emplois dans poleEmploi pour la premi√®re fois
-			// Les autres fois, il suffira de republier seulement quand un emploi est de novueau libre (d√©mission d'un employ√©)
-			for(Emploi e:emplois){
-				if(!e.estPourvu()){
-					// publier l'emploi dans PoleEmploi
-					if(!poleEmploi.attente.contains(e))	poleEmploi.attente.add(e);
-				}
-			}
-			
-			// Register "clock" service
+			// Register "etat" service
 			DFAgentDescription dfd = new DFAgentDescription();
 			dfd.setName(getAID());
 			ServiceDescription sd = new ServiceDescription();
-			sd.setType("clock");
+			sd.setType("etat");
 			sd.setName("");
 			dfd.addServices(sd);
 			try {
@@ -87,6 +78,7 @@ public class Etat extends Agent{
 			}
 			
 			// Add behaviour
+			addBehaviour(new PublierEmplois());
 			addBehaviour(new Demission());
 		}
 		else {
@@ -96,29 +88,50 @@ public class Etat extends Agent{
 		}
 	}
 
-	private class PublierEmplois extends OneShotBehaviour {
-		
-		Emploi emploi;
-		
-		PublierEmplois(Emploi e){
-			emploi = e;
-		}
-		
+	private class PublierEmplois extends OneShotBehaviour{
+
+		@Override
 		public void action() {
-			// publier l'emploi dans PoleEmploi
-			if(!poleEmploi.attente.contains(emploi))	poleEmploi.attente.add(emploi);
+			for(Emploi e : emplois){
+				// Message
+				ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
+
+				// poleEmploi est le destinataire
+				AID poleEmploi = new AID();
+				DFAgentDescription template = new DFAgentDescription();
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType("poleemploi");
+				template.addServices(sd);
+				try {
+					DFAgentDescription[] result = DFService.search(myAgent, template);
+					poleEmploi = result[0].getName();
+				}
+				catch (FIPAException fe) {
+					fe.printStackTrace();
+				}
+				msg.addReceiver(poleEmploi);
+
+				// gestion des emplois
+				try {
+					msg.setContentObject(e);// PJ
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				// envoi
+				myAgent.send(msg);
+			}
 		}
 	}
 	
 	private class Demission extends CyclicBehaviour {
 		
 		public void action() {
-			// G√©rer le protocole de d√©mission
+			// GÈrer le protocole de d√©mission
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null && msg.getContent().equals("demission")) {
-				// G√©rer la d√©mission
-				System.out.println(myAgent.getLocalName()+": demission re√ßue");
+				// GÈrer la dÈmission
+				System.out.println(myAgent.getLocalName()+": demission reÁue");
 				
 				Emploi e = null;
 				boolean found = false;
@@ -132,24 +145,42 @@ public class Etat extends Agent{
 				}
 				
 				if(found){
-					// R√©pondre par une confirmation
+					// RÈpondre par une confirmation
 					ACLMessage reply = msg.createReply();
 					reply.setPerformative(ACLMessage.CONFIRM);
 					reply.setContent("demission");
 					myAgent.send(reply);
-
-					// Supprimer l'emploi de la liste "pourvus" de poleEmploi
-					poleEmploi.pourvus.remove(e);
-
+					
 					// Supprimer le champs "employe" de l'emploie
 					e.setEmploye(null);
-
-					// Republier l'emploi
-					myAgent.addBehaviour(new PublierEmplois(e));
+					
+					ACLMessage newJob = new ACLMessage(ACLMessage.INFORM);
+					// poleEmploi est le destinataire
+					AID poleEmploi = new AID();
+					DFAgentDescription template = new DFAgentDescription();
+					ServiceDescription sd = new ServiceDescription();
+					sd.setType("poleemploi");
+					template.addServices(sd);
+					try {
+						DFAgentDescription[] result = DFService.search(myAgent, template);
+						poleEmploi = result[0].getName();
+					}
+					catch (FIPAException fe) {
+					fe.printStackTrace();
+					}
+					newJob.addReceiver(poleEmploi);
+					//gestion des emplois
+					try {
+						newJob.setContentObject(e);// PJ
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+					//envoi
+					myAgent.send(newJob);
 				}
 				else{
-					// R√©pondre par une erreur
-					System.err.println("Erreur dans le protocole de d√©mission!!");
+					// RÈpondre par une erreur
+					System.err.println("Erreur dans le protocole de dÈmission!!");
 					ACLMessage reply = msg.createReply();
 					reply.setPerformative(ACLMessage.FAILURE);
 					reply.setContent("demission");

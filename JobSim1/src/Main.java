@@ -11,7 +11,7 @@ public class Main {
 
 
 	public static void main(String[] args) throws StaleProxyException {
-		// ParamÃ¨tres
+		// Parametres
 		int nbInitial = 10;
 		int nbEntrants = 5;
 		int nbSortants = 5;
@@ -35,6 +35,7 @@ public class Main {
 		double[] rm_mean = new double[]{1000, 2000, 3000};
 		double[] rm_std_dev = new double[]{200, 200, 200};
 		
+		
 		int seed = 0;
 		Random random = new Random(seed);
 		
@@ -44,17 +45,17 @@ public class Main {
 		Profile pMain = new ProfileImpl("localhost",8888,null);
 		AgentContainer mc = rt.createMainContainer(pMain);
 
-		//TODO création des emplois initiaux!
 		AgentController poleEmploi = mc.createNewAgent("poleEmploi", "PoleEmploi", new Object[0]);
 		poleEmploi.start();
 		
-		Object[] paramEtat = new Object[]{nbEmplois1 ,nbEmplois2, nbEmplois3,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3,random,poleEmploi};
+		Object[] paramEtat = new Object[]{nbEmplois1 ,nbEmplois2, nbEmplois3,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3,random};
 		AgentController etat = mc.createNewAgent("etat", "Etat", paramEtat);
 		etat.start();
 		
 		for(int i=0; i<nbInitial; i++){
-			int degreQualif = random.nextInt(2);
+			int degreQualif = random.nextInt(3);
 			Individu.Qualification qualif = Individu.Qualification.values()[degreQualif];
+			System.out.println(qualif);
 			double rm = random.nextGaussian()*rm_std_dev[degreQualif]+rm_mean[degreQualif];
 			double tl = random.nextGaussian()*tl_std_dev+tl_mean;
 			Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z};

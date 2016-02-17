@@ -2,8 +2,9 @@ import java.util.Random;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.util.leap.Serializable;
 
-public class Emploi {
+public class Emploi implements Serializable {
 	
 	private double revenu;
 	private double tl_reel;

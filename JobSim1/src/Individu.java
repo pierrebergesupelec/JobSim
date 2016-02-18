@@ -26,6 +26,7 @@ public class Individu extends Agent{
 	double tl;
 	int moisSansTl;//nombre de mois que l'individu passe sans le temps libre souhaité
 	int moisSansEmploi;//nombre de mois sans emploi
+	int offresRefusees;//nombre d'offre refuées
 	int x;
 	int y;
 	double z;
@@ -45,6 +46,7 @@ public class Individu extends Agent{
 			
 			moisSansTl = 0;
 			moisSansEmploi = 0;
+			offresRefusees = 0;
 			
 			// Register "clock" service
 			DFAgentDescription dfd = new DFAgentDescription();
@@ -106,6 +108,7 @@ public class Individu extends Agent{
 					if(moisSansTl>=x){
 						// Ajouter le behaviour demissionner
 						addBehaviour(new Demissionner());
+						System.out.println(myAgent.getAID().getName() + " démissionne de l'emploi "+emploi);
 						// Terminer ce behaviour
 						terminate = true;
 					}
@@ -132,7 +135,7 @@ public class Individu extends Agent{
 				// Envoie du message
 				ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
 				req.addReceiver(emploi.getEmployeur());
-				req.setContent("demission");
+				req.setContent(Integer.toString(emploi.getID()));
 				myAgent.send(req);
 				step = 1;
 			case 1:
@@ -176,13 +179,18 @@ public class Individu extends Agent{
 			// A chaque pas d'horloge, incrémenter  moisSansEmploi
 			if (msg_clock != null && msg_clock.getContent().equals("clock")) {
 				moisSansEmploi ++;
+				// Décroitre le revenu attendu à chaque fois que offreRefusees devient multiple de y (sauf 0)
+				if( offresRefusees != 0 && (offresRefusees % y) == 0){
+					System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
+					rm = rm*(1-z);
+				}
 			} else
 				try {
 					if (msg != null && msg.getContentObject() instanceof Emploi) {
 						//protocole pour l'acceptation ou non d'un emploi
 						System.out.println(myAgent.getLocalName()+": proposition d'emploi recu");
 
-						//réponse é l'offre reçu
+						//réponse à l'offre reçu
 						if (emploi == null){//condition 1: inactif
 							Emploi e;
 							try {
@@ -203,12 +211,17 @@ public class Individu extends Agent{
 									addBehaviour(new avecEmploi());
 									// Terminer ce behaviour
 									terminate = true;
+									// RAZ offresRefusees
+									offresRefusees = 0;
 								}
 								else {
 									System.out.println(myAgent.getLocalName()+": emploi refusé");
-									ACLMessage answer = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-									answer.addReceiver(msg.getSender());
+									ACLMessage answer = msg.createReply();
+									answer.setPerformative(ACLMessage.REJECT_PROPOSAL);
+									answer.setContentObject(e);
 									myAgent.send(answer);
+									// Incrémenter offresRefusees
+									offresRefusees ++;
 								}
 							} catch (UnreadableException | IOException e1) {
 								e1.printStackTrace();
@@ -219,6 +232,8 @@ public class Individu extends Agent{
 							ACLMessage answer = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
 							answer.addReceiver(msg.getSender());
 							myAgent.send(answer);
+							// Incrémenter offresRefusees
+							offresRefusees ++;
 						}
 
 					}

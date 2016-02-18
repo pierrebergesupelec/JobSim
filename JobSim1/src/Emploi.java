@@ -6,11 +6,15 @@ import jade.util.leap.Serializable;
 
 public class Emploi implements Serializable {
 	
+	// Permet de générer une id unique pour chaque Emploi à la création
+	private static int idgenerator = 0;
+	
 	private double revenu;
 	private double tl_reel;
 	private double tl_std_dev;
 	private Random random;
 	
+	private int ID;
 	private AID employeur;
 	private AID employe;
 	private Individu.Qualification qualif;
@@ -22,9 +26,11 @@ public class Emploi implements Serializable {
 		random = rand;
 		employeur = empl;
 		qualif = q;
+		ID = idgenerator;
+		idgenerator ++;
 	}
 	
-	//copie constructeur
+	// Copie constructeur
 	public Emploi(Emploi e){
 		revenu = e.getRevenu();
 		tl_reel = e.tl_reel;
@@ -32,6 +38,14 @@ public class Emploi implements Serializable {
 		random = e.random;
 		employeur = e.getEmployeur();
 		qualif = e.getQualif();
+	}
+	
+	// Surcharge de equals pour ne comparer que l'ID
+	@Override
+	public boolean equals(Object other){
+	    if (other == null) 				return false;
+	    if (!(other instanceof Emploi))	return false;
+	    return ((Emploi)other).getID() == this.getID();
 	}
 	
 	public double getRevenu(){
@@ -52,6 +66,10 @@ public class Emploi implements Serializable {
 
 	public AID getEmploye() {
 		return employe;
+	}
+	
+	public int getID() {
+		return ID;
 	}
 
 	public void setEmploye(AID employe) {

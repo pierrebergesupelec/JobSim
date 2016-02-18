@@ -138,8 +138,8 @@ public class Etat extends Agent{
 				boolean found = false;
 				// Chercher l'emploi correspondant
 				for(Emploi tmp : emplois){
-					System.out.println(tmp.getEmploye()+" / "+msg.getSender());
-					if(tmp.getEmploye()==msg.getSender()){
+					System.out.println(tmp.getID()+" / "+Integer.parseInt(msg.getContent()));
+					if(tmp.getID()==Integer.parseInt(msg.getContent())){
 						found = true;
 						e = tmp;
 						break;

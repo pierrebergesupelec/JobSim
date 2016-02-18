@@ -13,7 +13,7 @@ public class Horloge extends Agent{
 	
 	protected void setup(){
 		// Initialisation message
-		System.out.println(getAID().getName()+" is ready.");
+		System.out.println(getLocalName()+" is ready.");
 
 		// Get the parameters
 		Object[] args = getArguments();
@@ -49,7 +49,7 @@ public class Horloge extends Agent{
 		}
 		else {
 			// Make the agent terminate
-			System.out.println(getAID().getName()+" is not correctly initialised.");
+			System.out.println(getLocalName()+" is not correctly initialised.");
 			doDelete();
 		}
 

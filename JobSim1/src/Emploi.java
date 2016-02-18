@@ -6,7 +6,7 @@ import jade.util.leap.Serializable;
 
 public class Emploi implements Serializable {
 	
-	// Permet de générer une id unique pour chaque Emploi à la création
+	// Permet de gÃ©nÃ©rer une id unique pour chaque Emploi Ã  la crÃ©ation
 	private static int idgenerator = 0;
 	
 	private double revenu;
@@ -47,6 +47,12 @@ public class Emploi implements Serializable {
 	    if (!(other instanceof Emploi))	return false;
 	    return ((Emploi)other).getID() == this.getID();
 	}
+	
+	// Surcharge de toString pour afficher l'ID de l'emploi
+	@Override 
+	public String toString() {
+	    return "Emploi n"+Integer.toString(getID());
+	  }
 	
 	public double getRevenu(){
 		return revenu;

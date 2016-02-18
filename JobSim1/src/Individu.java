@@ -76,11 +76,11 @@ public class Individu extends Agent{
 			addBehaviour(new sansEmploi());
 			
 			// Initialisation message
-			System.out.println(getAID().getName()+" is ready. "+qualif.name());
+			System.out.println(getLocalName()+" is ready. "+qualif.name());
 		}
 		else {
 			// Make the agent terminate
-			System.out.println(getAID().getName()+" is not correctly initialised.");
+			System.out.println(getLocalName()+" is not correctly initialised.");
 			doDelete();
 		}
 	}
@@ -108,11 +108,11 @@ public class Individu extends Agent{
 					if(moisSansTl>=x){
 						// Ajouter le behaviour demissionner
 						addBehaviour(new Demissionner());
-						System.out.println(myAgent.getAID().getName() + " démissionne de l'emploi "+emploi);
+						System.out.println(myAgent.getLocalName() + " démissionne de l'emploi "+emploi);
 						// Terminer ce behaviour
 						terminate = true;
 					}
-					System.out.println(myAgent.getAID().getName() + " Un mois de travail en plus: tlreel="+tl_reel+", tlindiv="+tl+", moisSansTl="+moisSansTl);
+					System.out.println(myAgent.getLocalName() + " Un mois de travail en plus: tlreel="+tl_reel+", tlindiv="+tl+", moisSansTl="+moisSansTl);
 				}
 			}
 			else {
@@ -188,15 +188,13 @@ public class Individu extends Agent{
 				try {
 					if (msg != null && msg.getContentObject() instanceof Emploi) {
 						//protocole pour l'acceptation ou non d'un emploi
-						System.out.println(myAgent.getLocalName()+": proposition d'emploi recu");
-
 						//réponse à l'offre reçu
 						if (emploi == null){//condition 1: inactif
 							Emploi e;
 							try {
 								e = (Emploi) msg.getContentObject();
 								boolean goodQualif = e.getQualif() == qualif;
-								System.out.println(e.getQualif()+" "+qualif+" "+e.getRevenu()+" "+rm);
+								System.out.println(myAgent.getLocalName()+": proposition d'emploi recu "+e.getQualif()+" "+qualif+" "+e.getRevenu()+" "+rm);
 								if (goodQualif && e.getRevenu()>=rm){
 									System.out.println(myAgent.getLocalName()+": emploi accepté");
 									//envoi réponse
@@ -251,6 +249,6 @@ public class Individu extends Agent{
 	}
 
 	protected void takeDown() {
-		System.out.println(getAID().getName()+" terminating.");
+		System.out.println(getLocalName()+" terminating.");
 	}
 }

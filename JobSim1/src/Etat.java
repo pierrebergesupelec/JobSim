@@ -32,7 +32,7 @@ public class Etat extends Agent{
 
 	protected void setup() {
 		// Initialisation message
-		System.out.println("Etat "+getAID().getName()+" is ready.");
+		System.out.println("Etat "+getLocalName()+" is ready.");
 
 		// Get the parameters
 		Object[] args = getArguments();
@@ -196,6 +196,6 @@ public class Etat extends Agent{
 	}
 	
 	protected void takeDown() {
-		System.out.println("Etat "+getAID().getName()+" terminating.");
+		System.out.println("Etat "+getLocalName()+" terminating.");
 	}
 }

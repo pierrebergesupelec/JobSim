@@ -179,11 +179,6 @@ public class Individu extends Agent{
 			// A chaque pas d'horloge, incrémenter  moisSansEmploi
 			if (msg_clock != null && msg_clock.getContent().equals("clock")) {
 				moisSansEmploi ++;
-				// Décroitre le revenu attendu à chaque fois que offreRefusees devient multiple de y (sauf 0)
-				if( offresRefusees != 0 && (offresRefusees % y) == 0){
-					System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
-					rm = rm*(1-z);
-				}
 			} else
 				try {
 					if (msg != null && msg.getContentObject() instanceof Emploi) {
@@ -220,6 +215,11 @@ public class Individu extends Agent{
 									myAgent.send(answer);
 									// Incrémenter offresRefusees
 									offresRefusees ++;
+									// Décroitre le revenu attendu à chaque fois que offreRefusees devient multiple de y (sauf 0)
+									if( offresRefusees != 0 && (offresRefusees % y) == 0){
+										System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
+										rm = rm*(1-z);
+									}
 								}
 							} catch (UnreadableException | IOException e1) {
 								e1.printStackTrace();
@@ -232,6 +232,11 @@ public class Individu extends Agent{
 							myAgent.send(answer);
 							// Incrémenter offresRefusees
 							offresRefusees ++;
+							// Décroitre le revenu attendu à chaque fois que offreRefusees devient multiple de y (sauf 0)
+							if( offresRefusees != 0 && (offresRefusees % y) == 0){
+								System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
+								rm = rm*(1-z);
+							}
 						}
 
 					}

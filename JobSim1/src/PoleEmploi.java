@@ -22,7 +22,7 @@ public class PoleEmploi extends Agent {
 	protected void setup() {
 		
 		// Initialisation message
-		System.out.println("Pole Emploi "+getAID().getName()+" is ready.");
+		System.out.println("Pole Emploi "+getLocalName()+" is ready.");
 
 		// Initialisation liste d'emplois
 		pourvus = new ArrayList<Emploi>();
@@ -47,7 +47,7 @@ public class PoleEmploi extends Agent {
 	}
 	
 	protected void takeDown() {
-		System.out.println("Pole Emploi "+getAID().getName()+" terminating.");
+		System.out.println("Pole Emploi "+getLocalName()+" terminating.");
 	}
 	
 	//PoleEmploi s'occupe de donner les emplois en attente é des travailleurs
@@ -142,8 +142,10 @@ public class PoleEmploi extends Agent {
 				 // msg de démission
 				 if (msg.getPerformative() == ACLMessage.INFORM) {
 					 try {
-						attente.add((Emploi)msg.getContentObject());
-						pourvus.remove((Emploi)msg.getContentObject());
+						Emploi emploi = (Emploi)msg.getContentObject();
+						emploi.setEmploye(null);
+						attente.add(emploi);
+						pourvus.remove(emploi);
 					 } catch (UnreadableException e) {
 						 e.printStackTrace();
 					 }
@@ -169,12 +171,13 @@ public class PoleEmploi extends Agent {
 		}
 	}
 	
-	//PoleEmploi s'occupe de donne l'emplois en attente é un travailleur
+	//PoleEmploi s'occupe de donne l'emplois en attente à un travailleur
 	private class donnerEmploi extends Behaviour{
 
 		private boolean terminate = false;
 		int step = 0;
-		Emploi e = null;	//Emploi é traiter
+		Emploi e = null;	//Emploi à traiter
+		AID AIDtravailleur;
 		
 		public donnerEmploi(Emploi emploi){
 			e = emploi;
@@ -182,12 +185,10 @@ public class PoleEmploi extends Agent {
 		
 		@Override
 		public void action() {
-			
-			MessageTemplate mt = null; // Template pour réception des messages
-
+			//System.out.println("action!!!!!!!!!!!!!!!!!!!!!!!! "+attente.size()+" "+pourvus.size()); TODO à supprimer
 			switch (step){
 			case 0:
-				//Message envoyé
+				//Message à envoyé
 				ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 
 				//liste de destinataires : tous les travailleurs avec la bonne qualification
@@ -211,9 +212,10 @@ public class PoleEmploi extends Agent {
 					//choix d'un destinataire au pif
 					int i = (int) (Math.random()*travailleurs.length);
 					msg.addReceiver(travailleurs[i]);
-					System.out.println("Pole Emploi envoie une proposition d'emploi à " + travailleurs[i].getName());
+					AIDtravailleur = travailleurs[i];
+					System.out.println("Pole Emploi envoie une proposition d'emploi à " + travailleurs[i].getLocalName());
 
-					//Envoi des informations relatives é l'emploi
+					//Envoi des informations relatives à l'emploi
 					try {
 						msg.setContentObject(e);// PJ
 					} catch (IOException e1) {
@@ -224,10 +226,13 @@ public class PoleEmploi extends Agent {
 				}
 				break;
 			case 1:
+				MessageTemplate mt = null; // Template pour réception des messages
 				mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL));
+				mt = MessageTemplate.and(mt, MessageTemplate.MatchSender(AIDtravailleur));
 				ACLMessage reply = myAgent.receive(mt);
+				//if(reply!=null) System.out.println("Voila!!!!!!!!!!!!!!!!!!!!!! "+ reply.getSender().getLocalName()); TODO à supprimer
 				try {
-					if (reply != null && reply.getContentObject()==e) {
+					if (reply != null && reply.getContentObject().equals(e)) {
 						// réponse du travailleur
 						if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
 							e.setEmploye(reply.getSender());

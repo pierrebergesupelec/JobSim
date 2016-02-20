@@ -32,7 +32,7 @@ public class Etat extends Agent{
 
 	protected void setup() {
 		// Initialisation message
-		System.out.println("Etat "+getAID().getName()+" is ready.");
+		System.out.println("Etat "+getLocalName()+" is ready.");
 
 		// Get the parameters
 		Object[] args = getArguments();
@@ -138,8 +138,8 @@ public class Etat extends Agent{
 				boolean found = false;
 				// Chercher l'emploi correspondant
 				for(Emploi tmp : emplois){
-					System.out.println(tmp.getEmploye()+" / "+msg.getSender());
-					if(tmp.getEmploye()==msg.getSender()){
+					System.out.println(tmp.getID()+" / "+Integer.parseInt(msg.getContent()));
+					if(tmp.getID()==Integer.parseInt(msg.getContent())){
 						found = true;
 						e = tmp;
 						break;
@@ -196,6 +196,6 @@ public class Etat extends Agent{
 	}
 	
 	protected void takeDown() {
-		System.out.println("Etat "+getAID().getName()+" terminating.");
+		System.out.println("Etat "+getLocalName()+" terminating.");
 	}
 }

@@ -12,7 +12,7 @@ public class Main {
 
 	public static void main(String[] args) throws StaleProxyException {
 		// Parametres
-		int nbInitial = 10;
+		int[] nbInitial = {6,4,3};
 		int nbEntrants = 5;
 		int nbSortants = 5;
 		int nbEmplois1 = 6;
@@ -30,13 +30,13 @@ public class Main {
 		int x = 3;
 		int y = 10;
 		double z = 0.10;
-		double tl_mean = 10;
-		double tl_std_dev = 5;
+		double tl_mean = 8;			// temps libre attendu assez faible -> situation stable
+		double tl_std_dev = 0;		// idem
 		double[] rm_mean = new double[]{1000, 2000, 3000};
 		double[] rm_std_dev = new double[]{200, 200, 200};
 		
 		
-		int seed = 0;
+		int seed = 10; 
 		Random random = new Random(seed);
 		
 		Runtime rt = Runtime.instance();
@@ -51,16 +51,18 @@ public class Main {
 		Object[] paramEtat = new Object[]{nbEmplois1 ,nbEmplois2, nbEmplois3,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3,random};
 		AgentController etat = mc.createNewAgent("etat", "Etat", paramEtat);
 		etat.start();
-		
-		for(int i=0; i<nbInitial; i++){
-			int degreQualif = random.nextInt(3);
-			Individu.Qualification qualif = Individu.Qualification.values()[degreQualif];
-			System.out.println(qualif);
-			double rm = random.nextGaussian()*rm_std_dev[degreQualif]+rm_mean[degreQualif];
-			double tl = random.nextGaussian()*tl_std_dev+tl_mean;
-			Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z};
-			AgentController individu = mc.createNewAgent("individu "+i, "Individu", paramIndividu);
-			individu.start();
+		int compteur = 0;
+		for(int degreQualif=0; degreQualif<nbInitial.length; degreQualif++){
+			for(int i=0; i<nbInitial[degreQualif]; i++){
+				Individu.Qualification qualif = Individu.Qualification.values()[degreQualif];
+				System.out.println(qualif);
+				double rm = random.nextGaussian()*rm_std_dev[degreQualif]+rm_mean[degreQualif];
+				double tl = random.nextGaussian()*tl_std_dev+tl_mean;
+				Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z};
+				AgentController individu = mc.createNewAgent("individu "+compteur, "Individu", paramIndividu);
+				compteur++;
+				individu.start();
+			}
 		}
 		
 		Object[] paramHorloge = new Object[]{1000};

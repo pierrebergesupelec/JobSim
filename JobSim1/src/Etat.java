@@ -130,15 +130,14 @@ public class Etat extends Agent{
 			// Gérer le protocole de démission
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
 			ACLMessage msg = myAgent.receive(mt);
-			if (msg != null && msg.getContent().equals("demission")) {
+			if (msg != null) {
 				// Gérer la démission
-				System.out.println(myAgent.getLocalName()+": demission reçue");
+				System.out.println(myAgent.getLocalName()+": demission de "+msg.getSender().getLocalName()+" reçue");
 				
 				Emploi e = null;
 				boolean found = false;
 				// Chercher l'emploi correspondant
 				for(Emploi tmp : emplois){
-					System.out.println(tmp.getID()+" / "+Integer.parseInt(msg.getContent()));
 					if(tmp.getID()==Integer.parseInt(msg.getContent())){
 						found = true;
 						e = tmp;
@@ -147,7 +146,7 @@ public class Etat extends Agent{
 				}
 				
 				if(found){
-					// Répondre par une confirmation
+					// Répondre à l'individu par une confirmation
 					ACLMessage reply = msg.createReply();
 					reply.setPerformative(ACLMessage.CONFIRM);
 					reply.setContent("demission");
@@ -156,8 +155,7 @@ public class Etat extends Agent{
 					// Supprimer le champs "employe" de l'emploie
 					e.setEmploye(null);
 					
-					ACLMessage newJob = new ACLMessage(ACLMessage.INFORM);
-					// poleEmploi est le destinataire
+					// poleEmploi est le destinataire des messages suivants
 					AID poleEmploi = new AID();
 					DFAgentDescription template = new DFAgentDescription();
 					ServiceDescription sd = new ServiceDescription();
@@ -170,6 +168,21 @@ public class Etat extends Agent{
 					catch (FIPAException fe) {
 					fe.printStackTrace();
 					}
+					
+					// Informer PoleEmploi de la suppression de cet emploi (<-> démission)
+					ACLMessage oldJob = new ACLMessage(ACLMessage.INFORM);
+					oldJob.addReceiver(poleEmploi);
+					//gestion des emplois
+					try {
+						oldJob.setContentObject(e);// PJ
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+					//envoi
+					myAgent.send(oldJob);
+					
+					// Informer PoleEmploi de la remise sur le marché de cet emploi
+					ACLMessage newJob = new ACLMessage(ACLMessage.PROPOSE);
 					newJob.addReceiver(poleEmploi);
 					//gestion des emplois
 					try {

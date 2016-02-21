@@ -50,101 +50,20 @@ public class PoleEmploi extends Agent {
 		System.out.println("Pole Emploi "+getLocalName()+" terminating.");
 	}
 	
-	//PoleEmploi s'occupe de donner les emplois en attente é des travailleurs
-	/* TODO delete
-	private class donnerEmploi extends CyclicBehaviour{
-
-		int step = 0;
-		int nb_tentatives = 0;//nombre de fois oé on essaie de donner un emploi
-		
-		@Override
-		public void action() {
-			
-			int index = 0;
-			MessageTemplate mt = null; // Template pour réception des messages
-
-			//on agit é condition qu'il y ait des emplois en attente
-			while (attente.size() > 0 && nb_tentatives < 100){
-				switch (step){
-				case 0:
-					//Emploi é traiter
-					Emploi e = attente.get(index);
-					
-					//Message envoyé
-					ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
-
-					//liste de destinataires : tous les travailleurs avec la bonne qualification
-					AID[] travailleurs = new AID[0];
-					DFAgentDescription template = new DFAgentDescription();
-					ServiceDescription sd = new ServiceDescription();
-					sd.setType(e.getQualif().name());
-					template.addServices(sd);
-					try {
-						DFAgentDescription[] result = DFService.search(myAgent, template);
-						travailleurs = new AID[result.length];
-						for (int i = 0; i < result.length; ++i) {
-							travailleurs[i] = result[i].getName();
-						}
-					}
-					catch (FIPAException fe) {
-					fe.printStackTrace();
-					}
-					
-					//choix d'un destinataire au pif
-					int i = (int) (Math.random()*travailleurs.length);
-					enCours = travailleurs[i];
-					msg.addReceiver(travailleurs[i]);
-					System.out.println("Pole Emploi envoie une proposition d'emploi é " + travailleurs[i].getName());
-					
-					//Envoi des informations relatives é l'emploi
-					try {
-						msg.setContentObject(e);// PJ
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-					myAgent.send(msg);
-					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("jobOffer"),
-							 MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
-					step = 1;
-					break;
-				case 1:
-					ACLMessage reply = myAgent.receive(mt);
-					 if (reply != null) {
-						 //réponse du travailleur
-						 if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-							 Emploi copy = new Emploi(attente.get(index));
-							 copy.setEmploye(reply.getSender());
-							 pourvus.add(copy);
-							 attente.remove(0);
-							 step = 2;
-							 nb_tentatives = 0;
-						 }
-						 if (reply.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-							 step = 0;
-							 nb_tentatives++;
-						 }
-						 
-					 } else {
-						 block();
-					 }
-				}
-			}
-		}
-	}
-	*/
-	
 	private class maj extends CyclicBehaviour{
 
 		@Override
 		public void action() {
-			ACLMessage msg = myAgent.receive();
+			MessageTemplate mt = null; // Template pour réception des messages
+			mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
+			ACLMessage msg = myAgent.receive(mt);
 			 if (msg != null) {
-				 // msg de démission
+				 // msg de démission (suppression de l'emploi)
 				 if (msg.getPerformative() == ACLMessage.INFORM) {
 					 try {
 						Emploi emploi = (Emploi)msg.getContentObject();
 						emploi.setEmploye(null);
-						attente.add(emploi);
+						//attente.add(emploi); TODO delete
 						pourvus.remove(emploi);
 					 } catch (UnreadableException e) {
 						 e.printStackTrace();
@@ -155,7 +74,7 @@ public class PoleEmploi extends Agent {
 					 Emploi e;
 					 try {
 						 e = (Emploi)msg.getContentObject();
-						 System.out.println("maj: "+e);
+						 System.out.println("PoleEmploi recoit: "+e);
 						 if(!pourvus.contains(e) && !attente.contains(e)){
 							 attente.add(e);
 							 addBehaviour(new donnerEmploi(e));
@@ -185,7 +104,6 @@ public class PoleEmploi extends Agent {
 		
 		@Override
 		public void action() {
-			//System.out.println("action!!!!!!!!!!!!!!!!!!!!!!!! "+attente.size()+" "+pourvus.size()); TODO à supprimer
 			switch (step){
 			case 0:
 				//Message à envoyé
@@ -207,14 +125,12 @@ public class PoleEmploi extends Agent {
 				catch (FIPAException fe) {
 					fe.printStackTrace();
 				}
-				
 				if(travailleurs.length > 0){
 					//choix d'un destinataire au pif
 					int i = (int) (Math.random()*travailleurs.length);
 					msg.addReceiver(travailleurs[i]);
 					AIDtravailleur = travailleurs[i];
-					System.out.println("Pole Emploi envoie une proposition d'emploi à " + travailleurs[i].getLocalName());
-
+					System.out.println("Pole Emploi envoie une proposition "+e+" à " + travailleurs[i].getLocalName());
 					//Envoi des informations relatives à l'emploi
 					try {
 						msg.setContentObject(e);// PJ
@@ -229,26 +145,23 @@ public class PoleEmploi extends Agent {
 				MessageTemplate mt = null; // Template pour réception des messages
 				mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL));
 				mt = MessageTemplate.and(mt, MessageTemplate.MatchSender(AIDtravailleur));
+				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId(Integer.toString(e.getID())));
+				
 				ACLMessage reply = myAgent.receive(mt);
-				//if(reply!=null) System.out.println("Voila!!!!!!!!!!!!!!!!!!!!!! "+ reply.getSender().getLocalName()); TODO à supprimer
-				try {
-					if (reply != null && reply.getContentObject().equals(e)) {
-						// réponse du travailleur
-						if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-							e.setEmploye(reply.getSender());
-							pourvus.add(e);
-							attente.remove(e);
-							step = 2;
-							terminate = true;
-						}
-						if (reply.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-							step = 0;
-						}
-					} else {
-						block();
+				if (reply != null){
+					// réponse du travailleur
+					if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+						e.setEmploye(reply.getSender());
+						pourvus.add(e);
+						attente.remove(e);
+						step = 2;
+						terminate = true;
 					}
-				} catch (UnreadableException e1) {
-					e1.printStackTrace();
+					if (reply.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
+						step = 0;
+					}
+				} else {
+					block();
 				}
 			}
 		}

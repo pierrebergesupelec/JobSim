@@ -1,5 +1,6 @@
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Random;
 
 import jade.core.AID;
@@ -90,9 +91,16 @@ public class Individu extends Agent{
 		private boolean terminate = false;
 		
 		public void action() {
+			// clock msg
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 			ACLMessage msg = myAgent.receive(mt);
-			if (msg != null && msg.getContent().equals("clock")) {
+			// Proposition d'emploi msg -> renvoyer un refu
+			MessageTemplate mt_e = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
+			ACLMessage msg_e = myAgent.receive(mt_e);
+			// Conditions
+			boolean condition1 = msg != null && msg.getContent().equals("clock");
+			boolean condition2 = msg_e != null;
+			if (condition1) {
 				// Vérifier que l'individu a un emploi
 				if(emploi!=null){
 					// Obtenir le temps libre de ce mois pour cet emploi 
@@ -115,7 +123,19 @@ public class Individu extends Agent{
 					System.out.println(myAgent.getLocalName() + " Un mois de travail en plus: tlreel="+tl_reel+", tlindiv="+tl+", moisSansTl="+moisSansTl);
 				}
 			}
-			else {
+			if(condition2){
+				ACLMessage answer = msg_e.createReply();
+				answer.setPerformative(ACLMessage.REJECT_PROPOSAL);
+				try {
+					answer.setConversationId(Integer.toString(((Emploi)msg_e.getContentObject()).getID()));
+					answer.setContentObject(msg_e.getContentObject());
+					System.out.println(myAgent.getLocalName()+": "+(Emploi)msg_e.getContentObject()+" refusé, car déjà employé.");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				myAgent.send(answer);
+			}
+			if(!condition1 && !condition2) {
 				block();
 			}
 		}
@@ -144,6 +164,7 @@ public class Individu extends Agent{
 				ACLMessage msg = myAgent.receive(mt);
 				if(msg != null){
 					if(msg.getPerformative()==ACLMessage.CONFIRM){
+						//System.out.println(myAgent.getLocalName()+" démission finalisée"); TODO delete
 						// Terminer ce behaviour
 						terminate = true;
 						// Supprime l'emploi de la mémoire de l'individu
@@ -165,10 +186,10 @@ public class Individu extends Agent{
 			return terminate;
 		}
 	}
-	
+
 	private class sansEmploi extends Behaviour {
 		private boolean terminate = false;
-		
+
 		public void action() {
 			// Clock msg
 			MessageTemplate mt_clock = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
@@ -179,73 +200,81 @@ public class Individu extends Agent{
 			// A chaque pas d'horloge, incrémenter  moisSansEmploi
 			if (msg_clock != null && msg_clock.getContent().equals("clock")) {
 				moisSansEmploi ++;
-			} else
-				try {
-					if (msg != null && msg.getContentObject() instanceof Emploi) {
-						//protocole pour l'acceptation ou non d'un emploi
-						//réponse à l'offre reçu
-						if (emploi == null){//condition 1: inactif
-							Emploi e;
-							try {
-								e = (Emploi) msg.getContentObject();
-								boolean goodQualif = e.getQualif() == qualif;
-								System.out.println(myAgent.getLocalName()+": proposition d'emploi recu "+e.getQualif()+" "+qualif+" "+e.getRevenu()+" "+rm);
-								if (goodQualif && e.getRevenu()>=rm){
-									System.out.println(myAgent.getLocalName()+": emploi accepté");
-									//envoi réponse
-									ACLMessage answer = msg.createReply();
-									answer.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-									answer.setContentObject(e);
-									myAgent.send(answer);
-									moisSansEmploi = 0;
-									emploi = e;
-									emploi.setEmploye(getAID());
-									// Ajouter le behaviour avecEmploi
-									addBehaviour(new avecEmploi());
-									// Terminer ce behaviour
-									terminate = true;
-									// RAZ offresRefusees
-									offresRefusees = 0;
-								}
-								else {
-									System.out.println(myAgent.getLocalName()+": emploi refusé");
-									ACLMessage answer = msg.createReply();
-									answer.setPerformative(ACLMessage.REJECT_PROPOSAL);
-									answer.setContentObject(e);
-									myAgent.send(answer);
-									// Incrémenter offresRefusees
-									offresRefusees ++;
-									// Décroitre le revenu attendu à chaque fois que offreRefusees devient multiple de y (sauf 0)
-									if( offresRefusees != 0 && (offresRefusees % y) == 0){
-										System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
-										rm = rm*(1-z);
-									}
-								}
-							} catch (UnreadableException | IOException e1) {
-								e1.printStackTrace();
+			}
+			try {
+				if (msg != null && msg.getContentObject() instanceof Emploi) {
+					//protocole pour l'acceptation ou non d'un emploi
+					//réponse à l'offre reçu
+					if (emploi == null){//condition 1: inactif
+						Emploi e;
+						try {
+							e = (Emploi) msg.getContentObject();
+							boolean goodQualif = e.getQualif() == qualif;
+							System.out.println(myAgent.getLocalName()+": proposition d'emploi recu "+e.getQualif()+" "+qualif+" "+e.getRevenu()+" "+rm);
+							if (goodQualif && e.getRevenu()>=rm){
+								System.out.println(myAgent.getLocalName()+": "+e+" accepté");
+								//envoi réponse
+								ACLMessage answer = msg.createReply();			
+								answer.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+								answer.setConversationId(Integer.toString(e.getID()));
+								answer.setContentObject(e);
+								myAgent.send(answer);
+								moisSansEmploi = 0;
+								emploi = e;
+								emploi.setEmploye(getAID());
+								// Ajouter le behaviour avecEmploi
+								addBehaviour(new avecEmploi());
+								// Terminer ce behaviour
+								terminate = true;
+								// RAZ offresRefusees
+								offresRefusees = 0;
 							}
-
-						} else {
-							System.out.println(myAgent.getLocalName()+": emploi refusé");
-							ACLMessage answer = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-							answer.addReceiver(msg.getSender());
-							myAgent.send(answer);
-							// Incrémenter offresRefusees
-							offresRefusees ++;
-							// Décroitre le revenu attendu à chaque fois que offreRefusees devient multiple de y (sauf 0)
-							if( offresRefusees != 0 && (offresRefusees % y) == 0){
-								System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
-								rm = rm*(1-z);
+							else {
+								System.out.println(myAgent.getLocalName()+": "+e+" refusé");
+								ACLMessage answer = msg.createReply();
+								answer.setPerformative(ACLMessage.REJECT_PROPOSAL);
+								answer.setConversationId(Integer.toString(e.getID()));
+								answer.setContentObject(e);
+								myAgent.send(answer);
+								// Incrémenter offresRefusees
+								offresRefusees ++;
+								// Décroitre le revenu attendu à chaque fois que offreRefusees devient multiple de y (sauf 0)
+								if( offresRefusees != 0 && (offresRefusees % y) == 0){
+									System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
+									rm = rm*(1-z);
+								}
 							}
+						} catch (UnreadableException | IOException e1) {
+							e1.printStackTrace();
 						}
 
+					} else {
+						System.out.println(myAgent.getLocalName()+": "+(Emploi)msg.getContentObject()+" refusé");
+						ACLMessage answer = msg.createReply();
+						answer.setPerformative(ACLMessage.REJECT_PROPOSAL);
+						try {
+							answer.setConversationId(Integer.toString(((Emploi)msg.getContentObject()).getID()));
+							answer.setContentObject(msg.getContentObject());
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						myAgent.send(answer);
+						// Incrémenter offresRefusees
+						offresRefusees ++;
+						// Décroitre le revenu attendu à chaque fois que offreRefusees devient multiple de y (sauf 0)
+						if( offresRefusees != 0 && (offresRefusees % y) == 0){
+							System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
+							rm = rm*(1-z);
+						}
 					}
-					else {
-						block();
-					}
-				} catch (UnreadableException e) {
-					e.printStackTrace();
+
 				}
+				else {
+					block();
+				}
+			} catch (UnreadableException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		public boolean done() {

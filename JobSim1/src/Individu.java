@@ -32,6 +32,10 @@ public class Individu extends Agent{
 	int y;
 	double z;
 	
+	double annees_cotisation = 0.0;
+	
+	public static double depart_retraite = 43.0;
+	
 	Emploi emploi = null;
 	
 	protected void setup() {
@@ -101,6 +105,8 @@ public class Individu extends Agent{
 			boolean condition1 = msg != null && msg.getContent().equals("clock");
 			boolean condition2 = msg_e != null;
 			if (condition1) {
+				//+1 mois de cotisation pour la retraite
+				annees_cotisation += (1.0/12.0);
 				// Vérifier que l'individu a un emploi
 				if(emploi!=null){
 					// Obtenir le temps libre de ce mois pour cet emploi 
@@ -164,7 +170,6 @@ public class Individu extends Agent{
 				ACLMessage msg = myAgent.receive(mt);
 				if(msg != null){
 					if(msg.getPerformative()==ACLMessage.CONFIRM){
-						//System.out.println(myAgent.getLocalName()+" démission finalisée"); TODO delete
 						// Terminer ce behaviour
 						terminate = true;
 						// Supprime l'emploi de la mémoire de l'individu

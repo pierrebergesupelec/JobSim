@@ -107,6 +107,7 @@ public class Individu extends Agent{
 			if (condition1) {
 				//+1 mois de cotisation pour la retraite
 				annees_cotisation += (1.0/12.0);
+				if (annees_cotisation > depart_retraite) doDelete();//depart à la retraite
 				// VÃ©rifier que l'individu a un emploi
 				if(emploi!=null){
 					// Obtenir le temps libre de ce mois pour cet emploi 

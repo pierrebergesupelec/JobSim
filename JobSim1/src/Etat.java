@@ -132,7 +132,7 @@ public class Etat extends Agent{
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				// Gérer la démission
-				System.out.println(myAgent.getLocalName()+": demission de "+msg.getSender().getLocalName()+" reçue");
+				//System.out.println(myAgent.getLocalName()+": demission de "+msg.getSender().getLocalName()+" reçue");
 				
 				Emploi e = null;
 				boolean found = false;

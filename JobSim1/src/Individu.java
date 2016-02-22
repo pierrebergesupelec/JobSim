@@ -81,7 +81,7 @@ public class Individu extends Agent{
 			addBehaviour(new sansEmploi());
 			
 			// Initialisation message
-			System.out.println(getLocalName()+" is ready. "+qualif.name());
+			//System.out.println(getLocalName()+" is ready. "+qualif.name());
 		}
 		else {
 			// Make the agent terminate
@@ -126,7 +126,7 @@ public class Individu extends Agent{
 					if(moisSansTl>=x){
 						// Ajouter le behaviour demissionner
 						addBehaviour(new Demissionner());
-						System.out.println(myAgent.getLocalName() + " démissionne de l'emploi "+emploi);
+						//System.out.println(myAgent.getLocalName() + " démissionne de l'emploi "+emploi);
 						// Terminer ce behaviour
 						terminate = true;
 					}
@@ -177,6 +177,7 @@ public class Individu extends Agent{
 					if(msg.getPerformative()==ACLMessage.CONFIRM){
 						// Terminer ce behaviour
 						terminate = true;
+						GenerateurIndividu.nb_chomeurs++;
 						// Supprime l'emploi de la mémoire de l'individu
 						emploi = null;
 						// Se mettre dans le behaviour sansEmploi
@@ -220,6 +221,8 @@ public class Individu extends Agent{
 					if(msg.getPerformative()==ACLMessage.CONFIRM){
 						// Terminer ce behaviour
 						terminate = true;
+						if (emploi == null) GenerateurIndividu.nb_chomeurs--;
+						GenerateurIndividu.nb_inscrits--;
 						// Supprime l'emploi de la mémoire de l'individu
 						emploi = null;
 						// Initier la suppresser de l'agent
@@ -263,7 +266,7 @@ public class Individu extends Agent{
 						try {
 							e = (Emploi) msg.getContentObject();
 							boolean goodQualif = e.getQualif() == qualif;
-							System.out.println(myAgent.getLocalName()+": proposition d'emploi recu "+e.getQualif()+" "+qualif+" "+e.getRevenu()+" "+rm);
+							//System.out.println(myAgent.getLocalName()+": proposition d'emploi recu "+e.getQualif()+" "+qualif+" "+e.getRevenu()+" "+rm);
 							if (goodQualif && e.getRevenu()>=rm){
 								//System.out.println(myAgent.getLocalName()+": "+e+" accepté");
 								//envoi réponse
@@ -281,6 +284,7 @@ public class Individu extends Agent{
 								terminate = true;
 								// RAZ offresRefusees
 								offresRefusees = 0;
+								GenerateurIndividu.nb_chomeurs--;
 							}
 							else {
 								//System.out.println(myAgent.getLocalName()+": "+e+" refusé");
@@ -293,7 +297,7 @@ public class Individu extends Agent{
 								offresRefusees ++;
 								// Décroitre le revenu attendu à chaque fois que offreRefusees devient multiple de y (sauf 0)
 								if( offresRefusees != 0 && (offresRefusees % y) == 0){
-									System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
+									//System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
 									rm = rm*(1-z);
 								}
 							}
@@ -316,7 +320,7 @@ public class Individu extends Agent{
 						offresRefusees ++;
 						// Décroitre le revenu attendu à chaque fois que offreRefusees devient multiple de y (sauf 0)
 						if( offresRefusees != 0 && (offresRefusees % y) == 0){
-							System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
+							//System.out.println(myAgent.getLocalName()+": décroit son revenu attendu de "+rm+" à "+rm*(1-z)+". ("+offresRefusees+" offres refusées.)");
 							rm = rm*(1-z);
 						}
 					}

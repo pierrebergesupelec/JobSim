@@ -40,6 +40,11 @@ public class GenerateurIndividu extends Agent {
 	int compteur = 0;
 	int id_individus = 1;
 	
+
+	//statistiques
+	public static int nb_inscrits = 0;
+	public static int nb_chomeurs = 0;
+	
 	
 	protected void setup() {
 		// Get the parameters
@@ -60,6 +65,8 @@ public class GenerateurIndividu extends Agent {
 			y = (int) args[12];
 			z = (double) args[13];
 			mc = (AgentContainer) args[14];
+			nb_chomeurs = nb_initial;
+			nb_inscrits = nb_initial;
 			
 			// Register "clock" service
 			DFAgentDescription dfd = new DFAgentDescription();
@@ -99,7 +106,7 @@ public class GenerateurIndividu extends Agent {
 			if (condition) {
 				compteur++;
 			}
-			if (compteur > 0 && compteur%12 == 0 && condition){
+			if ((compteur > 0) && (compteur%12 == 0) && condition){
 				int nb_arrivants = (int) (random.nextGaussian()*nb_arrivants_std_dev + nb_arrivants_moyen);
 				
 				int nb_ouvriers = (int) (nb_arrivants*proportion_ouvriers);
@@ -122,8 +129,11 @@ public class GenerateurIndividu extends Agent {
 						try {
 							individu = mc.createNewAgent("individu "+ (nb_initial+id_individus), "Individu", paramIndividu);
 							individu.start();
-							System.out.println("Un nouvel individu sur le marché du travail !!");
+							//System.out.println("Un nouvel individu sur le marché du travail !!");
 							id_individus++;
+							nb_chomeurs++;
+							nb_inscrits++;
+							compteur = 0;
 						} catch (StaleProxyException e) {
 							e.printStackTrace();
 						}

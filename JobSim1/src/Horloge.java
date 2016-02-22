@@ -23,6 +23,11 @@ public class Horloge extends Agent{
 			addBehaviour(new TickerBehaviour(this, pasHorloge) {
 				protected void onTick() {
 					System.out.println("1 month has passed");
+					
+					System.out.println("Nombre d'inscrits " + GenerateurIndividu.nb_inscrits);
+					System.out.println("Nombre de chômeurs " + GenerateurIndividu.nb_chomeurs);
+					int taux = (GenerateurIndividu.nb_chomeurs*100)/GenerateurIndividu.nb_inscrits;
+					System.out.println("taux de chomage :" + taux);
 
 					// Maj de la liste de tous les agents
 					DFAgentDescription template = new DFAgentDescription();

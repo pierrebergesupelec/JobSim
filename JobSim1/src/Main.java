@@ -12,8 +12,15 @@ public class Main {
 
 	public static void main(String[] args) throws StaleProxyException {
 		// Parametres
-		int[] nbInitial = {6,4,3};
-		int nb_initial = nbInitial[0] + nbInitial[1] + nbInitial[2];
+		double proportion_ouvriers = 0.4;
+		double proportion_techniciens = 0.3;
+		double proportion_cadres = 0.3;
+		int nb_initial = 100;
+		int nb_ouvriers = (int) (nb_initial*proportion_ouvriers);
+		int nb_techniciens = (int) (nb_initial*proportion_techniciens);
+		int nb_cadres = (int) (nb_initial*proportion_cadres);
+		int[] nbInitial = {nb_ouvriers,nb_techniciens,nb_cadres};
+		
 		
 		int nbEntrants = 5;
 		int nbSortants = 5;
@@ -40,11 +47,8 @@ public class Main {
 		double[] rm_mean = new double[]{1000, 2000, 3000};
 		double[] rm_std_dev = new double[]{200, 200, 200};
 		
-		int nb_arrivants_moyen = 2;
-		double nb_arrivants_std_dev = 0;
-		double proportion_ouvriers = 1;
-		double proportion_techniciens = 0;
-		double proportion_cadres = 0;
+		int nb_arrivants_moyen = 5;
+		double nb_arrivants_std_dev = 1;
 		
 		
 		int seed = 10; 
@@ -66,7 +70,7 @@ public class Main {
 		for(int degreQualif=0; degreQualif<nbInitial.length; degreQualif++){
 			for(int i=0; i<nbInitial[degreQualif]; i++){
 				Individu.Qualification qualif = Individu.Qualification.values()[degreQualif];
-				System.out.println(qualif);
+				//System.out.println(qualif);
 				double rm = random.nextGaussian()*rm_std_dev[degreQualif]+rm_mean[degreQualif];
 				double tl = random.nextGaussian()*tl_std_dev+tl_mean;
 				Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z};

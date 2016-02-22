@@ -73,7 +73,7 @@ public class PoleEmploi extends Agent {
 					 Emploi e;
 					 try {
 						 e = (Emploi)msg.getContentObject();
-						 System.out.println("PoleEmploi recoit: "+e);
+						 //System.out.println("PoleEmploi recoit: "+e);
 						 if(!pourvus.contains(e) && !attente.contains(e)){
 							 attente.add(e);
 							 addBehaviour(new donnerEmploi(e));

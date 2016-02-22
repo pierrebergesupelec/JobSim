@@ -107,7 +107,10 @@ public class Individu extends Agent{
 			if (condition1) {
 				//+1 mois de cotisation pour la retraite
 				annees_cotisation += (1.0/12.0);
-				if (annees_cotisation > depart_retraite) doDelete();//depart � la retraite
+				if (annees_cotisation > depart_retraite){	//depart à la retraite
+					terminate = true;
+					addBehaviour(new DepartRetraite());
+				}
 				// Vérifier que l'individu a un emploi
 				if(emploi!=null){
 					// Obtenir le temps libre de ce mois pour cet emploi 
@@ -152,6 +155,7 @@ public class Individu extends Agent{
 		}
 	}
 	
+	// Behaviour pour le protocole de démission
 	private class Demissionner extends Behaviour {
 		private int step = 0;//en tout 2 etapes : demande et confirmation
 		private boolean terminate = false;//processus de décision terminé
@@ -193,6 +197,49 @@ public class Individu extends Agent{
 		}
 	}
 
+	// Behaviour pour le protocole de départ à la retraire 
+	// comme Demission avec doDelete à la fin (au lieu de lancer sansEmploi())
+	private class DepartRetraite extends Behaviour {
+		private int step = 0;//en tout 2 etapes : demande et confirmation
+		private boolean terminate = false;//processus de décision terminé
+		
+		public void action() {
+			switch(step){
+			case 0:
+				// Envoie du message
+				ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
+				req.addReceiver(emploi.getEmployeur());
+				req.setContent(Integer.toString(emploi.getID()));
+				myAgent.send(req);
+				step = 1;
+			case 1:
+				// Reception de la réponse
+				MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.CONFIRM), MessageTemplate.MatchPerformative(ACLMessage.FAILURE));
+				ACLMessage msg = myAgent.receive(mt);
+				if(msg != null){
+					if(msg.getPerformative()==ACLMessage.CONFIRM){
+						// Terminer ce behaviour
+						terminate = true;
+						// Supprime l'emploi de la mémoire de l'individu
+						emploi = null;
+						// Initier la suppresser de l'agent
+						doDelete();
+					}
+					else{
+						step = 0;
+					}
+				}
+				else{
+					block();
+				}
+			}
+		}
+
+		public boolean done() {
+			return terminate;
+		}
+	}
+	
 	private class sansEmploi extends Behaviour {
 		private boolean terminate = false;
 
@@ -289,6 +336,14 @@ public class Individu extends Agent{
 	}
 
 	protected void takeDown() {
+		// Deregister
+		try
+		{
+			DFService.deregister(this);
+		} catch (FIPAException fe) {
+			System.err.println("Can't deregister "+getLocalName()+"!");
+		}
+		// Affichage
 		System.out.println(getLocalName()+" terminating.");
 	}
 }

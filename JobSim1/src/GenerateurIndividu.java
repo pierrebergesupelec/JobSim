@@ -2,6 +2,7 @@ import java.util.Random;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -88,18 +89,17 @@ public class GenerateurIndividu extends Agent {
 	}
 	
 	
-	private class generer extends Behaviour{
+	private class generer extends CyclicBehaviour{
 
 		@Override
 		public void action() {
-			System.out.println("LE COMPTEUR POUR LE GENERATEUR EST A " + compteur);
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 			ACLMessage msg = myAgent.receive(mt);
 			boolean condition = msg != null && msg.getContent().equals("clock");
 			if (condition) {
 				compteur++;
 			}
-			if (compteur > 0 && compteur%12 == 0){
+			if (compteur > 0 && compteur%12 == 0 && condition){
 				int nb_arrivants = (int) (random.nextGaussian()*nb_arrivants_std_dev + nb_arrivants_moyen);
 				
 				int nb_ouvriers = (int) (nb_arrivants*proportion_ouvriers);
@@ -129,13 +129,7 @@ public class GenerateurIndividu extends Agent {
 						}
 					}
 				}
-				
 			}
-		}
-
-		@Override
-		public boolean done() {
-			return true;
 		}
 		
 	}

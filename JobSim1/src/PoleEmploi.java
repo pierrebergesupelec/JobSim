@@ -63,7 +63,6 @@ public class PoleEmploi extends Agent {
 					 try {
 						Emploi emploi = (Emploi)msg.getContentObject();
 						emploi.setEmploye(null);
-						//attente.add(emploi); TODO delete
 						pourvus.remove(emploi);
 					 } catch (UnreadableException e) {
 						 e.printStackTrace();

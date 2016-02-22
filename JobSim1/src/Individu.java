@@ -32,6 +32,10 @@ public class Individu extends Agent{
 	int y;
 	double z;
 	
+	double annees_cotisation = 0.0;
+	
+	public static double depart_retraite = 43.0;
+	
 	Emploi emploi = null;
 	
 	protected void setup() {
@@ -101,6 +105,9 @@ public class Individu extends Agent{
 			boolean condition1 = msg != null && msg.getContent().equals("clock");
 			boolean condition2 = msg_e != null;
 			if (condition1) {
+				//+1 mois de cotisation pour la retraite
+				annees_cotisation += (1.0/12.0);
+				if (annees_cotisation > depart_retraite) doDelete();//depart � la retraite
 				// Vérifier que l'individu a un emploi
 				if(emploi!=null){
 					// Obtenir le temps libre de ce mois pour cet emploi 
@@ -120,7 +127,7 @@ public class Individu extends Agent{
 						// Terminer ce behaviour
 						terminate = true;
 					}
-					System.out.println(myAgent.getLocalName() + " Un mois de travail en plus: tlreel="+tl_reel+", tlindiv="+tl+", moisSansTl="+moisSansTl);
+					//System.out.println(myAgent.getLocalName() + " Un mois de travail en plus: tlreel="+tl_reel+", tlindiv="+tl+", moisSansTl="+moisSansTl);
 				}
 			}
 			if(condition2){
@@ -129,7 +136,7 @@ public class Individu extends Agent{
 				try {
 					answer.setConversationId(Integer.toString(((Emploi)msg_e.getContentObject()).getID()));
 					answer.setContentObject(msg_e.getContentObject());
-					System.out.println(myAgent.getLocalName()+": "+(Emploi)msg_e.getContentObject()+" refusé, car déjà employé.");
+					//System.out.println(myAgent.getLocalName()+": "+(Emploi)msg_e.getContentObject()+" refusé, car déjà employé.");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -164,7 +171,6 @@ public class Individu extends Agent{
 				ACLMessage msg = myAgent.receive(mt);
 				if(msg != null){
 					if(msg.getPerformative()==ACLMessage.CONFIRM){
-						//System.out.println(myAgent.getLocalName()+" démission finalisée"); TODO delete
 						// Terminer ce behaviour
 						terminate = true;
 						// Supprime l'emploi de la mémoire de l'individu
@@ -212,7 +218,7 @@ public class Individu extends Agent{
 							boolean goodQualif = e.getQualif() == qualif;
 							System.out.println(myAgent.getLocalName()+": proposition d'emploi recu "+e.getQualif()+" "+qualif+" "+e.getRevenu()+" "+rm);
 							if (goodQualif && e.getRevenu()>=rm){
-								System.out.println(myAgent.getLocalName()+": "+e+" accepté");
+								//System.out.println(myAgent.getLocalName()+": "+e+" accepté");
 								//envoi réponse
 								ACLMessage answer = msg.createReply();			
 								answer.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
@@ -230,7 +236,7 @@ public class Individu extends Agent{
 								offresRefusees = 0;
 							}
 							else {
-								System.out.println(myAgent.getLocalName()+": "+e+" refusé");
+								//System.out.println(myAgent.getLocalName()+": "+e+" refusé");
 								ACLMessage answer = msg.createReply();
 								answer.setPerformative(ACLMessage.REJECT_PROPOSAL);
 								answer.setConversationId(Integer.toString(e.getID()));
@@ -249,7 +255,7 @@ public class Individu extends Agent{
 						}
 
 					} else {
-						System.out.println(myAgent.getLocalName()+": "+(Emploi)msg.getContentObject()+" refusé");
+						//System.out.println(myAgent.getLocalName()+": "+(Emploi)msg.getContentObject()+" refusé");
 						ACLMessage answer = msg.createReply();
 						answer.setPerformative(ACLMessage.REJECT_PROPOSAL);
 						try {

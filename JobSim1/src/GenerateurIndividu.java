@@ -43,13 +43,22 @@ public class GenerateurIndividu extends Agent {
 	protected void setup() {
 		// Get the parameters
 		Object[] args = getArguments();
-		if (args != null && args.length == 6) {
+		if (args != null && args.length == 15) {
 			random = (Random) args[0];
 			nb_arrivants_moyen = (int) args[1];
 			nb_arrivants_std_dev = (double) args[2];
-			proportion_ouvriers = (double) args[3];
-			proportion_techniciens = (double) args[4];
-			proportion_cadres = (double) args[5];
+			nb_initial = (int) args[3];
+			proportion_ouvriers = (double) args[4];
+			proportion_techniciens = (double) args[5];
+			proportion_cadres = (double) args[6];
+			rm_mean = (double[]) args[7];
+			rm_std_dev = (double[]) args[8];
+			tl_mean = (double) args[9];
+			tl_std_dev = (double) args[10];
+			x = (int) args[11];
+			y = (int) args[12];
+			z = (double) args[13];
+			mc = (AgentContainer) args[14];
 			
 			// Register "clock" service
 			DFAgentDescription dfd = new DFAgentDescription();
@@ -67,6 +76,9 @@ public class GenerateurIndividu extends Agent {
 			
 			// Add behaviours
 			addBehaviour(new generer());
+			
+			// Initialisation message
+			System.out.println(getLocalName()+" is ready. ");
 		}
 		else {
 			// Make the agent terminate
@@ -80,13 +92,14 @@ public class GenerateurIndividu extends Agent {
 
 		@Override
 		public void action() {
+			System.out.println("LE COMPTEUR POUR LE GENERATEUR EST A " + compteur);
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 			ACLMessage msg = myAgent.receive(mt);
 			boolean condition = msg != null && msg.getContent().equals("clock");
 			if (condition) {
 				compteur++;
 			}
-			if (compteur%12 == 0){
+			if (compteur > 0 && compteur%12 == 0){
 				int nb_arrivants = (int) (random.nextGaussian()*nb_arrivants_std_dev + nb_arrivants_moyen);
 				
 				int nb_ouvriers = (int) (nb_arrivants*proportion_ouvriers);
@@ -116,8 +129,6 @@ public class GenerateurIndividu extends Agent {
 						}
 					}
 				}
-				
-				compteur++;
 				
 			}
 		}

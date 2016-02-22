@@ -127,7 +127,7 @@ public class Individu extends Agent{
 						// Terminer ce behaviour
 						terminate = true;
 					}
-					System.out.println(myAgent.getLocalName() + " Un mois de travail en plus: tlreel="+tl_reel+", tlindiv="+tl+", moisSansTl="+moisSansTl);
+					//System.out.println(myAgent.getLocalName() + " Un mois de travail en plus: tlreel="+tl_reel+", tlindiv="+tl+", moisSansTl="+moisSansTl);
 				}
 			}
 			if(condition2){
@@ -136,7 +136,7 @@ public class Individu extends Agent{
 				try {
 					answer.setConversationId(Integer.toString(((Emploi)msg_e.getContentObject()).getID()));
 					answer.setContentObject(msg_e.getContentObject());
-					System.out.println(myAgent.getLocalName()+": "+(Emploi)msg_e.getContentObject()+" refusé, car déjà employé.");
+					//System.out.println(myAgent.getLocalName()+": "+(Emploi)msg_e.getContentObject()+" refusé, car déjà employé.");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -218,7 +218,7 @@ public class Individu extends Agent{
 							boolean goodQualif = e.getQualif() == qualif;
 							System.out.println(myAgent.getLocalName()+": proposition d'emploi recu "+e.getQualif()+" "+qualif+" "+e.getRevenu()+" "+rm);
 							if (goodQualif && e.getRevenu()>=rm){
-								System.out.println(myAgent.getLocalName()+": "+e+" accepté");
+								//System.out.println(myAgent.getLocalName()+": "+e+" accepté");
 								//envoi réponse
 								ACLMessage answer = msg.createReply();			
 								answer.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
@@ -236,7 +236,7 @@ public class Individu extends Agent{
 								offresRefusees = 0;
 							}
 							else {
-								System.out.println(myAgent.getLocalName()+": "+e+" refusé");
+								//System.out.println(myAgent.getLocalName()+": "+e+" refusé");
 								ACLMessage answer = msg.createReply();
 								answer.setPerformative(ACLMessage.REJECT_PROPOSAL);
 								answer.setConversationId(Integer.toString(e.getID()));
@@ -255,7 +255,7 @@ public class Individu extends Agent{
 						}
 
 					} else {
-						System.out.println(myAgent.getLocalName()+": "+(Emploi)msg.getContentObject()+" refusé");
+						//System.out.println(myAgent.getLocalName()+": "+(Emploi)msg.getContentObject()+" refusé");
 						ACLMessage answer = msg.createReply();
 						answer.setPerformative(ACLMessage.REJECT_PROPOSAL);
 						try {

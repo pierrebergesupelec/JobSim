@@ -13,11 +13,14 @@ public class Main {
 	public static void main(String[] args) throws StaleProxyException {
 		// Parametres
 		int[] nbInitial = {6,4,3};
+		int nb_initial = nbInitial[0] + nbInitial[1] + nbInitial[2];
+		
 		int nbEntrants = 5;
 		int nbSortants = 5;
 		int nbEmplois1 = 6;
 		int nbEmplois2 = 4;
 		int nbEmplois3 = 3;
+		
 		double r_1 = 1000;
 		double r_2 = 2000;
 		double r_3 = 3000;
@@ -27,13 +30,21 @@ public class Main {
 		double e_tl_dev1 = 5;
 		double e_tl_dev2 = 5;
 		double e_tl_dev3 = 5;
+		
 		int x = 3;
 		int y = 10;
 		double z = 0.10;
+		
 		double tl_mean = 8;			// temps libre attendu assez faible -> situation stable
 		double tl_std_dev = 0;		// idem
 		double[] rm_mean = new double[]{1000, 2000, 3000};
 		double[] rm_std_dev = new double[]{200, 200, 200};
+		
+		int nb_arrivants_moyen = 2;
+		double nb_arrivants_std_dev = 0;
+		double proportion_ouvriers = 1;
+		double proportion_techniciens = 0;
+		double proportion_cadres = 0;
 		
 		
 		int seed = 10; 
@@ -68,6 +79,14 @@ public class Main {
 		Object[] paramHorloge = new Object[]{1000};
 		AgentController horloge = mc.createNewAgent("horloge", "Horloge", paramHorloge);
 		horloge.start();
+		
+		Object[] paramGenerateur = {random, nb_arrivants_moyen, nb_arrivants_std_dev, nb_initial,
+									proportion_ouvriers, proportion_techniciens, proportion_cadres,
+									rm_mean, rm_std_dev, tl_mean, tl_std_dev,
+									x, y, z, mc};
+		AgentController generateur = mc.createNewAgent("generateurIndividu", "GenerateurIndividu", paramGenerateur);
+		generateur.start();
+		
 	}
 
 }

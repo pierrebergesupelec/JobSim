@@ -105,40 +105,43 @@ public class GenerateurIndividu extends Agent {
 			boolean condition = msg != null && msg.getContent().equals("clock");
 			if (condition) {
 				compteur++;
-			}
-			if ((compteur > 0) && (compteur%12 == 0) && condition){
-				int nb_arrivants = (int) (random.nextGaussian()*nb_arrivants_std_dev + nb_arrivants_moyen);
-				
-				int nb_ouvriers = (int) (nb_arrivants*proportion_ouvriers);
-				int nb_techniciens = (int) (nb_arrivants*proportion_techniciens);
-				int nb_cadres = (int) (nb_arrivants*proportion_cadres);
-				
-				int[] cardinal = {nb_ouvriers,nb_techniciens,nb_cadres};
-				
-				Individu.Qualification[] qualifications = {Individu.Qualification.OUVRIER, 
-														Individu.Qualification.TECHNICIEN,
-														Individu.Qualification.CADRE};
-				
-				for (int i = 0; i < 3; i++){
-					for (int j = 0; j < cardinal[i]; j++){
-						Individu.Qualification qualif = qualifications[i];
-						double rm = random.nextGaussian()*rm_std_dev[i]+rm_mean[i];
-						double tl = random.nextGaussian()*tl_std_dev+tl_mean;
-						Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z};
-						AgentController individu;
-						try {
-							individu = mc.createNewAgent("individu "+ (nb_initial+id_individus), "Individu", paramIndividu);
-							individu.start();
-							//System.out.println("Un nouvel individu sur le marché du travail !!");
-							id_individus++;
-							nb_chomeurs++;
-							nb_inscrits++;
-							compteur = 0;
-						} catch (StaleProxyException e) {
-							e.printStackTrace();
+				if ((compteur > 0) && (compteur%12 == 0)){
+					int nb_arrivants = (int) (random.nextGaussian()*nb_arrivants_std_dev + nb_arrivants_moyen);
+					
+					int nb_ouvriers = (int) (nb_arrivants*proportion_ouvriers);
+					int nb_techniciens = (int) (nb_arrivants*proportion_techniciens);
+					int nb_cadres = (int) (nb_arrivants*proportion_cadres);
+					
+					int[] cardinal = {nb_ouvriers,nb_techniciens,nb_cadres};
+					
+					Individu.Qualification[] qualifications = {Individu.Qualification.OUVRIER, 
+															Individu.Qualification.TECHNICIEN,
+															Individu.Qualification.CADRE};
+					
+					for (int i = 0; i < 3; i++){
+						for (int j = 0; j < cardinal[i]; j++){
+							Individu.Qualification qualif = qualifications[i];
+							double rm = random.nextGaussian()*rm_std_dev[i]+rm_mean[i];
+							double tl = random.nextGaussian()*tl_std_dev+tl_mean;
+							Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z};
+							AgentController individu;
+							try {
+								individu = mc.createNewAgent("individu "+ (nb_initial+id_individus), "Individu", paramIndividu);
+								individu.start();
+								//System.out.println("Un nouvel individu sur le marchÃ© du travail !!");
+								id_individus++;
+								nb_chomeurs++;
+								nb_inscrits++;
+								compteur = 0;
+							} catch (StaleProxyException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				}
+			}
+			else{
+				block();
 			}
 		}
 		

@@ -80,6 +80,9 @@ public class Individu extends Agent{
 			// Add behaviours
 			addBehaviour(new sansEmploi());
 			
+			// L'individu s'ajoute dans la classe de stat: Statistiques
+			Statistiques.addIndividu(this);
+			
 			// Initialisation message
 			//System.out.println(getLocalName()+" is ready. "+qualif.name());
 		}
@@ -126,7 +129,7 @@ public class Individu extends Agent{
 					if(moisSansTl>=x){
 						// Ajouter le behaviour demissionner
 						addBehaviour(new Demissionner());
-						//System.out.println(myAgent.getLocalName() + " démissionne de l'emploi "+emploi);
+						System.out.println(myAgent.getLocalName() + " démissionne de l'emploi "+emploi);
 						// Terminer ce behaviour
 						terminate = true;
 					}
@@ -268,7 +271,7 @@ public class Individu extends Agent{
 							boolean goodQualif = e.getQualif() == qualif;
 							//System.out.println(myAgent.getLocalName()+": proposition d'emploi recu "+e.getQualif()+" "+qualif+" "+e.getRevenu()+" "+rm);
 							if (goodQualif && e.getRevenu()>=rm){
-								//System.out.println(myAgent.getLocalName()+": "+e+" accepté");
+								System.out.println(myAgent.getLocalName()+": "+e+" accepté");
 								//envoi réponse
 								ACLMessage answer = msg.createReply();			
 								answer.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
@@ -347,6 +350,8 @@ public class Individu extends Agent{
 		} catch (FIPAException fe) {
 			System.err.println("Can't deregister "+getLocalName()+"!");
 		}
+		// L'individu se retire de la classe de stat: Statistiques
+		Statistiques.removeIndividu(this);
 		// Affichage
 		System.out.println(getLocalName()+" terminating.");
 	}

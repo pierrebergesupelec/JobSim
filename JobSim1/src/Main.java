@@ -21,12 +21,9 @@ public class Main {
 		int nb_cadres = (int) (nb_initial*proportion_cadres);
 		int[] nbInitial = {nb_ouvriers,nb_techniciens,nb_cadres};
 		
-		
-		int nbEntrants = 5;
-		int nbSortants = 5;
-		int nbEmplois1 = 6;
-		int nbEmplois2 = 4;
-		int nbEmplois3 = 3;
+		int nbEmplois1 = (int) (nb_initial*proportion_ouvriers);
+		int nbEmplois2 = (int) (nb_initial*proportion_techniciens);
+		int nbEmplois3 = (int) (nb_initial*proportion_cadres);
 		
 		double r_1 = 1000;
 		double r_2 = 2000;
@@ -60,6 +57,10 @@ public class Main {
 		Profile pMain = new ProfileImpl("localhost",8888,null);
 		AgentContainer mc = rt.createMainContainer(pMain);
 
+		// Classe qui s'occupe des statistiques sur les individus
+		AgentController statistiques = mc.createNewAgent("statistiques", "Statistiques", new Object[0]);
+		statistiques.start();
+		
 		AgentController poleEmploi = mc.createNewAgent("poleEmploi", "PoleEmploi", new Object[0]);
 		poleEmploi.start();
 		

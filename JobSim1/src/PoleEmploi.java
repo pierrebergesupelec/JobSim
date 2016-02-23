@@ -82,6 +82,19 @@ public class PoleEmploi extends Agent {
 						 e1.printStackTrace();
 					 }
 				 }
+				 
+				 // TODO
+				 /*
+				 System.out.println("=================== pourvus ===============");
+				 for(Emploi e : pourvus){
+					 System.out.println(e);
+				 }
+				 System.out.println("=================== attente ===============");
+				 for(Emploi e : attente){
+					 System.out.println(e);
+				 }
+				 System.out.println("==========================================");
+				 */
 
 			 } else {
 				 block();
@@ -150,13 +163,13 @@ public class PoleEmploi extends Agent {
 				try {
 					DFAgentDescription[] result = DFService.search(myAgent, template2);
 					for (int i = 0; i < result.length; ++i) {
-						if(AIDtravailleur == result[i].getName())	isAlive = true;
+						if(AIDtravailleur.equals(result[i].getName()))	isAlive = true;
 					}
 				}
 				catch (FIPAException fe) {
 					fe.printStackTrace();
 				}
-				
+
 				if(!isAlive)	step = 0; // Si l'agent n'est plus vivant, reprend step = 0
 				else{	// Continuer à attendre un messages de AIDtravailleur
 					MessageTemplate mt = null; // Template pour réception des messages

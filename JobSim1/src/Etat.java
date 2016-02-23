@@ -4,6 +4,7 @@ import java.util.Random;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
@@ -169,29 +170,7 @@ public class Etat extends Agent{
 					fe.printStackTrace();
 					}
 					
-					// Informer PoleEmploi de la suppression de cet emploi (<-> démission)
-					ACLMessage oldJob = new ACLMessage(ACLMessage.INFORM);
-					oldJob.addReceiver(poleEmploi);
-					//gestion des emplois
-					try {
-						oldJob.setContentObject(e);// PJ
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-					//envoi
-					myAgent.send(oldJob);
-					
-					// Informer PoleEmploi de la remise sur le marché de cet emploi
-					ACLMessage newJob = new ACLMessage(ACLMessage.PROPOSE);
-					newJob.addReceiver(poleEmploi);
-					//gestion des emplois
-					try {
-						newJob.setContentObject(e);// PJ
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-					//envoi
-					myAgent.send(newJob);
+					addBehaviour(new DemissionInformerPoleEmploi(e,poleEmploi));
 				}
 				else{
 					// Répondre par une erreur
@@ -206,6 +185,69 @@ public class Etat extends Agent{
 				block();
 			}
 		}
+	}
+	
+	private class DemissionInformerPoleEmploi extends Behaviour {
+
+		private boolean terminate = false;
+		
+		private Emploi e;
+		private AID poleEmploi;
+		private int step = 0;
+		
+		public DemissionInformerPoleEmploi(Emploi emploi, AID pe){
+			e = emploi;
+			poleEmploi = pe;
+			step = 0;
+		}
+		
+		@Override
+		public void action() {
+			switch(step){
+			case 0:
+				// Informer PoleEmploi de la suppression de cet emploi (<-> démission)
+				ACLMessage oldJob = new ACLMessage(ACLMessage.INFORM);
+				oldJob.addReceiver(poleEmploi);
+				//gestion des emplois
+				try {
+					oldJob.setContentObject(e);// PJ
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				//envoi
+				myAgent.send(oldJob);
+				
+				step = 1;
+				
+			case 1:
+				// Attente de la confirmation
+				MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CONFIRM);
+				ACLMessage msg = myAgent.receive(mt);
+				if(msg != null){
+					// Informer PoleEmploi de la remise sur le marché de cet emploi
+					ACLMessage newJob = new ACLMessage(ACLMessage.PROPOSE);
+					newJob.addReceiver(poleEmploi);
+					//gestion des emplois
+					try {
+						newJob.setContentObject(e);// PJ
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+					//envoi
+					myAgent.send(newJob);
+					terminate = true;
+				}
+				else{
+					block();
+				}
+			}
+		}
+
+		@Override
+		public boolean done() {
+			return terminate;
+		}
+		
 	}
 	
 	protected void takeDown() {

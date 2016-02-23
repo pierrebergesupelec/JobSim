@@ -38,37 +38,48 @@ public class Individu extends Agent{
 	
 	Emploi emploi = null;
 	
+	// "clock" service
+	ServiceDescription sd;
+	// "worker" service
+	ServiceDescription sd2;
+	// qualification service
+	ServiceDescription sd3;
+	
 	protected void setup() {
 		// Get the parameters
 		Object[] args = getArguments();
-		if (args != null && args.length == 6) {
+		if (args != null && args.length == 7) {
 			qualif = (Qualification) args[0];
 			rm = (double) args[1];
 			tl = (double) args[2];
 			x = (int) args[3];
 			y = (int) args[4];
 			z = (double) args[5];
+			annees_cotisation = (double) args[6];
 			
 			moisSansTl = 0;
 			moisSansEmploi = 0;
 			offresRefusees = 0;
 			
+			// Initialize services
 			// Register "clock" service
+			sd = new ServiceDescription();
+			sd.setType("clock");
+			sd.setName(getName());
+			// Register "worker" service
+			sd2 = new ServiceDescription();
+			sd2.setType("worker");
+			sd2.setName(getName());
+			// Register qualification service
+			sd3 = new ServiceDescription();
+			sd3.setType(qualif.name());
+			sd3.setName(getName());
+			
+			// Register
 			DFAgentDescription dfd = new DFAgentDescription();
 			dfd.setName(getAID());
-			ServiceDescription sd = new ServiceDescription();
-			sd.setType("clock");
-			sd.setName("");
 			dfd.addServices(sd);
-			// Register "worker" service
-			ServiceDescription sd2 = new ServiceDescription();
-			sd2.setType("worker");
-			sd2.setName("");
 			dfd.addServices(sd2);
-			// Register qualification service
-			ServiceDescription sd3 = new ServiceDescription();
-			sd3.setType(qualif.name());
-			sd3.setName("");
 			dfd.addServices(sd3);
 			try {
 				DFService.register(this, dfd);
@@ -77,11 +88,11 @@ public class Individu extends Agent{
 				fe.printStackTrace();
 			}
 			
-			// Add behaviours
-			addBehaviour(new sansEmploi());
-			
 			// L'individu s'ajoute dans la classe de stat: Statistiques
 			Statistiques.addIndividu(this);
+			
+			// Add behaviours
+			addBehaviour(new sansEmploi());
 			
 			// Initialisation message
 			//System.out.println(getLocalName()+" is ready. "+qualif.name());
@@ -129,7 +140,8 @@ public class Individu extends Agent{
 					if(moisSansTl>=x){
 						// Ajouter le behaviour demissionner
 						addBehaviour(new Demissionner());
-						System.out.println(myAgent.getLocalName() + " démissionne de l'emploi "+emploi);
+						// TODO
+						//System.out.println(myAgent.getLocalName() + " démissionne de l'emploi "+emploi);
 						// Terminer ce behaviour
 						terminate = true;
 					}
@@ -178,6 +190,23 @@ public class Individu extends Agent{
 				ACLMessage msg = myAgent.receive(mt);
 				if(msg != null){
 					if(msg.getPerformative()==ACLMessage.CONFIRM){
+						
+						//TODO
+						// Réenregistrer "qualification" à l'annuaire Pour accéder aux offres d'emplois
+						DFAgentDescription dfd = new DFAgentDescription();
+						dfd.setName(getAID());
+						// Register "clock" service
+						dfd.addServices(sd);
+						// Register "worker" service
+						dfd.addServices(sd2);
+						// Register qualification service
+						dfd.addServices(sd3);
+						try {
+							DFService.modify(myAgent, dfd);
+						} catch (FIPAException e) {
+							e.printStackTrace();
+						}
+						
 						// Terminer ce behaviour
 						terminate = true;
 						GenerateurIndividu.nb_chomeurs++;
@@ -228,7 +257,7 @@ public class Individu extends Agent{
 						GenerateurIndividu.nb_inscrits--;
 						// Supprime l'emploi de la mémoire de l'individu
 						emploi = null;
-						// Initier la suppresser de l'agent
+						// Initier la suppression de l'agent
 						doDelete();
 					}
 					else{
@@ -247,8 +276,9 @@ public class Individu extends Agent{
 	}
 	
 	private class sansEmploi extends Behaviour {
+		
 		private boolean terminate = false;
-
+		
 		public void action() {
 			// Clock msg
 			MessageTemplate mt_clock = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
@@ -259,6 +289,7 @@ public class Individu extends Agent{
 			// A chaque pas d'horloge, incrémenter  moisSansEmploi
 			if (msg_clock != null && msg_clock.getContent().equals("clock")) {
 				moisSansEmploi ++;
+				//System.out.println(myAgent.getLocalName()); //TODO
 			}
 			try {
 				if (msg != null && msg.getContentObject() instanceof Emploi) {
@@ -271,7 +302,7 @@ public class Individu extends Agent{
 							boolean goodQualif = e.getQualif() == qualif;
 							//System.out.println(myAgent.getLocalName()+": proposition d'emploi recu "+e.getQualif()+" "+qualif+" "+e.getRevenu()+" "+rm);
 							if (goodQualif && e.getRevenu()>=rm){
-								System.out.println(myAgent.getLocalName()+": "+e+" accepté");
+								//System.out.println(myAgent.getLocalName()+": "+e+" accepté");
 								//envoi réponse
 								ACLMessage answer = msg.createReply();			
 								answer.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
@@ -288,6 +319,20 @@ public class Individu extends Agent{
 								// RAZ offresRefusees
 								offresRefusees = 0;
 								GenerateurIndividu.nb_chomeurs--;
+								
+								//TODO
+								// Retirer "qualification" de l'annuaire pour ne pas recevoir des offres d'emplois
+								DFAgentDescription dfd = new DFAgentDescription();
+								dfd.setName(getAID());
+								// Register "clock" service
+								dfd.addServices(sd);
+								// Register "worker" service
+								dfd.addServices(sd2);
+								try {
+									DFService.modify(myAgent, dfd);
+								} catch (FIPAException e1) {
+									e1.printStackTrace();
+								}
 							}
 							else {
 								//System.out.println(myAgent.getLocalName()+": "+e+" refusé");

@@ -12,10 +12,13 @@ public class Main {
 
 	public static void main(String[] args) throws StaleProxyException {
 		// Parametres
+		
+		int pasHorloge = 200;
+		
 		double proportion_ouvriers = 0.4;
 		double proportion_techniciens = 0.3;
 		double proportion_cadres = 0.3;
-		int nb_initial = 100;
+		int nb_initial = 320;
 		int nb_ouvriers = (int) (nb_initial*proportion_ouvriers);
 		int nb_techniciens = (int) (nb_initial*proportion_techniciens);
 		int nb_cadres = (int) (nb_initial*proportion_cadres);
@@ -36,7 +39,7 @@ public class Main {
 		double e_tl_dev3 = 5;
 		
 		int x = 3;
-		int y = 10;
+		int y = 3;
 		double z = 0.10;
 		
 		double tl_mean = 8;			// temps libre attendu assez faible -> situation stable
@@ -44,8 +47,8 @@ public class Main {
 		double[] rm_mean = new double[]{1000, 2000, 3000};
 		double[] rm_std_dev = new double[]{200, 200, 200};
 		
-		int nb_arrivants_moyen = 5;
-		double nb_arrivants_std_dev = 1;
+		int nb_arrivants_moyen = 6;
+		double nb_arrivants_std_dev = 0;
 		
 		
 		int seed = 10; 
@@ -55,6 +58,11 @@ public class Main {
 		rt.setCloseVM(true);
 		
 		Profile pMain = new ProfileImpl("localhost",8888,null);
+		// Les 2 lignes suivantes nous ont posé beaucoup de problème... ------------
+		// La taille des search du DF étant limité à 100 sinon
+		String property_dx_maxresult = "10000";
+		pMain.setParameter("jade_domain_df_maxresult", property_dx_maxresult); 
+		// -------------------------------------------------------------------------
 		AgentContainer mc = rt.createMainContainer(pMain);
 
 		// Classe qui s'occupe des statistiques sur les individus
@@ -74,14 +82,14 @@ public class Main {
 				//System.out.println(qualif);
 				double rm = random.nextGaussian()*rm_std_dev[degreQualif]+rm_mean[degreQualif];
 				double tl = random.nextGaussian()*tl_std_dev+tl_mean;
-				Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z};
+				Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z, Math.random()*43.0};
 				AgentController individu = mc.createNewAgent("individu "+compteur, "Individu", paramIndividu);
 				compteur++;
 				individu.start();
 			}
 		}
 		
-		Object[] paramHorloge = new Object[]{1000};
+		Object[] paramHorloge = new Object[]{pasHorloge};
 		AgentController horloge = mc.createNewAgent("horloge", "Horloge", paramHorloge);
 		horloge.start();
 		

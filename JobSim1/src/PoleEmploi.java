@@ -61,9 +61,15 @@ public class PoleEmploi extends Agent {
 				 // msg de démission (suppression de l'emploi)
 				 if (msg.getPerformative() == ACLMessage.INFORM) {
 					 try {
-						Emploi emploi = (Emploi)msg.getContentObject();
-						emploi.setEmploye(null);
-						pourvus.remove(emploi);
+						 // Répondre à l'Etat par une confirmation
+						 ACLMessage reply = msg.createReply();
+						 reply.setPerformative(ACLMessage.CONFIRM);
+						 reply.setContent("demission");
+						 myAgent.send(reply);
+						 // maj dans pourvus
+						 Emploi emploi = (Emploi)msg.getContentObject();
+						 emploi.setEmploye(null);
+						 pourvus.remove(emploi);
 					 } catch (UnreadableException e) {
 						 e.printStackTrace();
 					 }
@@ -74,9 +80,14 @@ public class PoleEmploi extends Agent {
 					 try {
 						 e = (Emploi)msg.getContentObject();
 						 //System.out.println("PoleEmploi recoit: "+e);
-						 if(!pourvus.contains(e) && !attente.contains(e)){
+						 if(!pourvus.contains(e) && !attente.contains(e)){ //TODO ?
 							 attente.add(e);
 							 addBehaviour(new donnerEmploi(e));
+						 }
+						 else{
+							 attente.add(e);
+							 addBehaviour(new donnerEmploi(e));
+							 System.err.println("Erreur protocole PoleEmploi!");
 						 }
 					 } catch (UnreadableException e1) {
 						 e1.printStackTrace();
@@ -154,16 +165,42 @@ public class PoleEmploi extends Agent {
 				}
 				break;
 			case 1:
+				// Attendre un messages de AIDtravailleur
+				MessageTemplate mt = null; // Template pour réception des messages
+				mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL));
+				mt = MessageTemplate.and(mt, MessageTemplate.MatchSender(AIDtravailleur));
+				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId(Integer.toString(e.getID())));
+
+				ACLMessage reply = myAgent.receive(mt);
+				if (reply != null){
+					// réponse du travailleur
+					if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+						e.setEmploye(reply.getSender());
+						pourvus.add(e);
+						attente.remove(e);
+						step = 2;
+						terminate = true;
+					}
+					if (reply.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
+						step = 0;
+					}
+				} else {
+					block();
+				}
+
 				// Vérifier que l'agent AIDtravailleur est encore vivant (s'il est encore enregistré)
 				DFAgentDescription template2 = new DFAgentDescription();
 				ServiceDescription sd2 = new ServiceDescription();
-				sd2.setType(e.getQualif().name());
+				sd2.setType("worker");
+				sd2.setName(AIDtravailleur.getName());
 				template2.addServices(sd2);
 				boolean isAlive = false;
 				try {
 					DFAgentDescription[] result = DFService.search(myAgent, template2);
 					for (int i = 0; i < result.length; ++i) {
-						if(AIDtravailleur.equals(result[i].getName()))	isAlive = true;
+						if(AIDtravailleur.equals(result[i].getName())){
+							isAlive = true;
+						}
 					}
 				}
 				catch (FIPAException fe) {
@@ -171,29 +208,7 @@ public class PoleEmploi extends Agent {
 				}
 
 				if(!isAlive)	step = 0; // Si l'agent n'est plus vivant, reprend step = 0
-				else{	// Continuer à attendre un messages de AIDtravailleur
-					MessageTemplate mt = null; // Template pour réception des messages
-					mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL));
-					mt = MessageTemplate.and(mt, MessageTemplate.MatchSender(AIDtravailleur));
-					mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId(Integer.toString(e.getID())));
-
-					ACLMessage reply = myAgent.receive(mt);
-					if (reply != null){
-						// réponse du travailleur
-						if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-							e.setEmploye(reply.getSender());
-							pourvus.add(e);
-							attente.remove(e);
-							step = 2;
-							terminate = true;
-						}
-						if (reply.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-							step = 0;
-						}
-					} else {
-						block();
-					}
-				}
+				
 			}
 		}
 

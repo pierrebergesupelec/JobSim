@@ -9,13 +9,18 @@ import jade.lang.acl.ACLMessage;
 
 public class Horloge extends Agent{
 
-	private DFAgentDescription[] allAgents;
+	//private DFAgentDescription[] allAgents; //TODO
 	private int pasHorloge;
+	
+	private int timeSimeStart;
 	
 	protected void setup(){
 		// Initialisation message
 		System.out.println(getLocalName()+" is ready.");
 
+		// Start time
+		timeSimeStart = 0;
+		
 		// Get the parameters
 		Object[] args = getArguments();
 		if (args != null && args.length == 1) {
@@ -23,7 +28,10 @@ public class Horloge extends Agent{
 			// Pas de l'horloge = pas du TickerBehaviour
 			addBehaviour(new TickerBehaviour(this, pasHorloge) {
 				protected void onTick() {
-					System.out.println("1 month has passed");
+					
+					timeSimeStart ++;
+					
+					System.out.println("1 month has passed ( total = "+timeSimeStart+" ).");
 					
 					// TODO
 					System.out.println("Nombre d'inscrits* " + GenerateurIndividu.nb_inscrits);
@@ -36,6 +44,7 @@ public class Horloge extends Agent{
 					ServiceDescription sd = new ServiceDescription();
 					sd.setType("clock");
 					template.addServices(sd);
+					DFAgentDescription[] allAgents = null;
 					try {
 						allAgents = DFService.search(myAgent, template); 
 					}
@@ -51,6 +60,8 @@ public class Horloge extends Agent{
 					cfp.setContent("clock");
 					cfp.setConversationId("clock");
 					myAgent.send(cfp);
+					
+					//System.out.println("LENTGH: "+allAgents.length); //TODO
 				}
 			} );
 		}

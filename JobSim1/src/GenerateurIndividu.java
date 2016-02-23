@@ -25,15 +25,15 @@ public class GenerateurIndividu extends Agent {
 	double proportion_techniciens;
 	double proportion_cadres;
 	
-	double[] rm_mean = new double[]{1000, 2000, 3000};
-	double[] rm_std_dev = new double[]{200, 200, 200};
+	double[] rm_mean;
+	double[] rm_std_dev;
 	
-	double tl_mean = 8;
-	double tl_std_dev = 0;		
+	double tl_mean;
+	double tl_std_dev;		
 	
-	int x = 3;
-	int y = 10;
-	double z = 0.10;
+	int x;
+	int y;
+	double z;
 	
 	AgentContainer mc;
 	
@@ -102,8 +102,7 @@ public class GenerateurIndividu extends Agent {
 		public void action() {
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
 			ACLMessage msg = myAgent.receive(mt);
-			boolean condition = msg != null && msg.getContent().equals("clock");
-			if (condition) {
+			if (msg != null && msg.getContent().equals("clock")) {
 				compteur++;
 				if ((compteur > 0) && (compteur%12 == 0)){
 					int nb_arrivants = (int) (random.nextGaussian()*nb_arrivants_std_dev + nb_arrivants_moyen);
@@ -123,7 +122,7 @@ public class GenerateurIndividu extends Agent {
 							Individu.Qualification qualif = qualifications[i];
 							double rm = random.nextGaussian()*rm_std_dev[i]+rm_mean[i];
 							double tl = random.nextGaussian()*tl_std_dev+tl_mean;
-							Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z};
+							Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z, 0.0};
 							AgentController individu;
 							try {
 								individu = mc.createNewAgent("individu "+ (nb_initial+id_individus), "Individu", paramIndividu);
@@ -132,12 +131,12 @@ public class GenerateurIndividu extends Agent {
 								id_individus++;
 								nb_chomeurs++;
 								nb_inscrits++;
-								compteur = 0;
 							} catch (StaleProxyException e) {
 								e.printStackTrace();
 							}
 						}
 					}
+					compteur = 0;
 				}
 			}
 			else{

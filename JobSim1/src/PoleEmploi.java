@@ -69,6 +69,7 @@ public class PoleEmploi extends Agent {
 						 // maj dans pourvus
 						 Emploi emploi = (Emploi)msg.getContentObject();
 						 emploi.setEmploye(null);
+						 if(!pourvus.contains(emploi))	System.err.println("Erreur 0 protocole PoleEmploi! Object = "+emploi);
 						 pourvus.remove(emploi);
 					 } catch (UnreadableException e) {
 						 e.printStackTrace();
@@ -80,14 +81,16 @@ public class PoleEmploi extends Agent {
 					 try {
 						 e = (Emploi)msg.getContentObject();
 						 //System.out.println("PoleEmploi recoit: "+e);
-						 if(!pourvus.contains(e) && !attente.contains(e)){ //TODO ?
+						 if(!pourvus.contains(e) && !attente.contains(e)){
 							 attente.add(e);
 							 addBehaviour(new donnerEmploi(e));
 						 }
 						 else{
+							 /*
 							 attente.add(e);
-							 addBehaviour(new donnerEmploi(e));
-							 System.err.println("Erreur protocole PoleEmploi!");
+							 addBehaviour(new donnerEmploi(e));*/
+							 if(pourvus.contains(e))	System.err.println("Erreur 1 protocole PoleEmploi!");
+							 if(attente.contains(e))	System.err.println("Erreur 2 protocole PoleEmploi!");
 						 }
 					 } catch (UnreadableException e1) {
 						 e1.printStackTrace();
@@ -106,7 +109,7 @@ public class PoleEmploi extends Agent {
 				 }
 				 System.out.println("==========================================");
 				 */
-
+				 //System.err.println(pourvus.size()+" / "+attente.size()+" / "+(pourvus.size()+attente.size())); TODO
 			 } else {
 				 block();
 			 }
@@ -187,7 +190,7 @@ public class PoleEmploi extends Agent {
 				} else {
 					block();
 				}
-
+				
 				// Vérifier que l'agent AIDtravailleur est encore vivant (s'il est encore enregistré)
 				DFAgentDescription template2 = new DFAgentDescription();
 				ServiceDescription sd2 = new ServiceDescription();

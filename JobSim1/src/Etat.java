@@ -94,7 +94,7 @@ public class Etat extends Agent{
 		@Override
 		public void action() {
 			for(Emploi e : emplois){
-				System.out.println("Etat"+e);
+				//System.out.println("Etat"+e); TODO
 				// Message
 				ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 
@@ -174,7 +174,7 @@ public class Etat extends Agent{
 				}
 				else{
 					// Répondre par une erreur
-					System.err.println("Erreur dans le protocole de démission!!");
+					System.err.println("Erreur dans le protocole de démission (Etat) !!");
 					ACLMessage reply = msg.createReply();
 					reply.setPerformative(ACLMessage.FAILURE);
 					reply.setContent("demission");
@@ -205,6 +205,20 @@ public class Etat extends Agent{
 		public void action() {
 			switch(step){
 			case 0:
+				
+				poleEmploi = new AID();
+				DFAgentDescription template = new DFAgentDescription();
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType("poleemploi");
+				template.addServices(sd);
+				try {
+					DFAgentDescription[] result = DFService.search(myAgent, template);
+					poleEmploi = result[0].getName();
+				}
+				catch (FIPAException fe) {
+				fe.printStackTrace();
+				}// TODO
+				
 				// Informer PoleEmploi de la suppression de cet emploi (<-> démission)
 				ACLMessage oldJob = new ACLMessage(ACLMessage.INFORM);
 				oldJob.addReceiver(poleEmploi);

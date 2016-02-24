@@ -140,8 +140,6 @@ public class Individu extends Agent{
 					if(moisSansTl>=x){
 						// Ajouter le behaviour demissionner
 						addBehaviour(new Demissionner());
-						// TODO
-						//System.out.println(myAgent.getLocalName() + " démissionne de l'emploi "+emploi);
 						// Terminer ce behaviour
 						terminate = true;
 					}
@@ -174,6 +172,10 @@ public class Individu extends Agent{
 	private class Demissionner extends Behaviour {
 		private int step = 0;//en tout 2 etapes : demande et confirmation
 		private boolean terminate = false;//processus de décision terminé
+		
+		public void onStart(){
+			//System.out.println(myAgent.getLocalName() + " démissionne de l'emploi "+emploi);
+		}
 		
 		public void action() {
 			switch(step){
@@ -209,7 +211,6 @@ public class Individu extends Agent{
 						
 						// Terminer ce behaviour
 						terminate = true;
-						GenerateurIndividu.nb_chomeurs++;
 						// Supprime l'emploi de la mémoire de l'individu
 						emploi = null;
 						// Se mettre dans le behaviour sansEmploi
@@ -236,6 +237,10 @@ public class Individu extends Agent{
 		private int step = 0;//en tout 2 etapes : demande et confirmation
 		private boolean terminate = false;//processus de décision terminé
 		
+		public void onStart(){
+			//System.err.println(myAgent.getLocalName()+": Depart à la retraite.");
+		}
+		
 		public void action() {
 			switch(step){
 			case 0:
@@ -253,14 +258,13 @@ public class Individu extends Agent{
 					if(msg.getPerformative()==ACLMessage.CONFIRM){
 						// Terminer ce behaviour
 						terminate = true;
-						if (emploi == null) GenerateurIndividu.nb_chomeurs--;
-						GenerateurIndividu.nb_inscrits--;
 						// Supprime l'emploi de la mémoire de l'individu
 						emploi = null;
 						// Initier la suppression de l'agent
 						doDelete();
 					}
 					else{
+						System.err.println(myAgent.getLocalName()+" Erreur DepartRetraite.");
 						step = 0;
 					}
 				}
@@ -289,7 +293,6 @@ public class Individu extends Agent{
 			// A chaque pas d'horloge, incrémenter  moisSansEmploi
 			if (msg_clock != null && msg_clock.getContent().equals("clock")) {
 				moisSansEmploi ++;
-				//System.out.println(myAgent.getLocalName()); //TODO
 			}
 			try {
 				if (msg != null && msg.getContentObject() instanceof Emploi) {
@@ -318,7 +321,6 @@ public class Individu extends Agent{
 								terminate = true;
 								// RAZ offresRefusees
 								offresRefusees = 0;
-								GenerateurIndividu.nb_chomeurs--;
 								
 								//TODO
 								// Retirer "qualification" de l'annuaire pour ne pas recevoir des offres d'emplois

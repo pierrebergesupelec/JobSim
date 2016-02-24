@@ -40,33 +40,26 @@ public class GenerateurIndividu extends Agent {
 	int compteur = 0;
 	int id_individus = 1;
 	
-
-	//statistiques
-	public static int nb_inscrits = 0;
-	public static int nb_chomeurs = 0;
-	
-	
 	protected void setup() {
 		// Get the parameters
 		Object[] args = getArguments();
-		if (args != null && args.length == 15) {
-			random = (Random) args[0];
-			nb_arrivants_moyen = (int) args[1];
-			nb_arrivants_std_dev = (double) args[2];
-			nb_initial = (int) args[3];
-			proportion_ouvriers = (double) args[4];
-			proportion_techniciens = (double) args[5];
-			proportion_cadres = (double) args[6];
-			rm_mean = (double[]) args[7];
-			rm_std_dev = (double[]) args[8];
-			tl_mean = (double) args[9];
-			tl_std_dev = (double) args[10];
-			x = (int) args[11];
-			y = (int) args[12];
-			z = (double) args[13];
-			mc = (AgentContainer) args[14];
-			nb_chomeurs = nb_initial;
-			nb_inscrits = nb_initial;
+		if (args != null && args.length == 14) {
+			nb_arrivants_moyen = (int) args[0];
+			nb_arrivants_std_dev = (double) args[1];
+			nb_initial = (int) args[2];
+			proportion_ouvriers = (double) args[3];
+			proportion_techniciens = (double) args[4];
+			proportion_cadres = (double) args[5];
+			rm_mean = (double[]) args[6];
+			rm_std_dev = (double[]) args[7];
+			tl_mean = (double) args[8];
+			tl_std_dev = (double) args[9];
+			x = (int) args[10];
+			y = (int) args[11];
+			z = (double) args[12];
+			mc = (AgentContainer) args[13];
+			
+			random = new Random();
 			
 			// Register "clock" service
 			DFAgentDescription dfd = new DFAgentDescription();
@@ -129,8 +122,6 @@ public class GenerateurIndividu extends Agent {
 								individu.start();
 								//System.out.println("Un nouvel individu sur le marché du travail !!");
 								id_individus++;
-								nb_chomeurs++;
-								nb_inscrits++;
 							} catch (StaleProxyException e) {
 								e.printStackTrace();
 							}

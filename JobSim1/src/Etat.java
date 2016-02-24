@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Random;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -29,7 +28,6 @@ public class Etat extends Agent{
 	double tl_dev2;
 	double tl_dev3;
 	ArrayList<Emploi> emplois;
-	Random random;
 
 	protected void setup() {
 		// Initialisation message
@@ -37,7 +35,7 @@ public class Etat extends Agent{
 
 		// Get the parameters
 		Object[] args = getArguments();
-		if (args != null && args.length == 13) {
+		if (args != null && args.length == 12) {
 			nbEmplois1 = (int) args[0];
 			nbEmplois2 = (int) args[1];
 			nbEmplois3 = (int) args[2];
@@ -50,18 +48,17 @@ public class Etat extends Agent{
 			tl_dev1 = (double) args[9];
 			tl_dev2 = (double) args[10];
 			tl_dev3 = (double) args[11];
-			random = (Random) args[12];
 			
 			// Créer les emplois
 			emplois = new ArrayList<Emploi>();
 			for(int i=0; i<nbEmplois1; i++){
-				emplois.add(new Emploi(r1,tl1,tl_dev1,random,this.getAID(),Individu.Qualification.OUVRIER));
+				emplois.add(new Emploi(r1,tl1,tl_dev1,this.getAID(),Individu.Qualification.OUVRIER));
 			}
 			for(int i=0; i<nbEmplois2; i++){
-				emplois.add(new Emploi(r2,tl2,tl_dev2,random,this.getAID(),Individu.Qualification.TECHNICIEN));
+				emplois.add(new Emploi(r2,tl2,tl_dev2,this.getAID(),Individu.Qualification.TECHNICIEN));
 			}
 			for(int i=0; i<nbEmplois3; i++){
-				emplois.add(new Emploi(r3,tl3,tl_dev3,random,this.getAID(),Individu.Qualification.CADRE));
+				emplois.add(new Emploi(r3,tl3,tl_dev3,this.getAID(),Individu.Qualification.CADRE));
 			}
 			
 			// Register "etat" service

@@ -34,20 +34,20 @@ public class Main {
 		double e_tl1 = 10;
 		double e_tl2 = 10;
 		double e_tl3 = 10;
-		double e_tl_dev1 = 5;
-		double e_tl_dev2 = 5;
-		double e_tl_dev3 = 5;
+		double e_tl_dev1 = 2;
+		double e_tl_dev2 = 2;
+		double e_tl_dev3 = 2;
 		
 		int x = 3;
 		int y = 3;
 		double z = 0.10;
 		
 		double tl_mean = 8;			// temps libre attendu assez faible -> situation stable
-		double tl_std_dev = 0;		// idem
+		double tl_std_dev = 0;			// idem
 		double[] rm_mean = new double[]{1000, 2000, 3000};
 		double[] rm_std_dev = new double[]{200, 200, 200};
 		
-		int nb_arrivants_moyen = 6;
+		int nb_arrivants_moyen = 0;
 		double nb_arrivants_std_dev = 0;
 		
 		
@@ -72,7 +72,7 @@ public class Main {
 		AgentController poleEmploi = mc.createNewAgent("poleEmploi", "PoleEmploi", new Object[0]);
 		poleEmploi.start();
 		
-		Object[] paramEtat = new Object[]{nbEmplois1 ,nbEmplois2, nbEmplois3,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3,random};
+		Object[] paramEtat = new Object[]{nbEmplois1 ,nbEmplois2, nbEmplois3,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3};
 		AgentController etat = mc.createNewAgent("etat", "Etat", paramEtat);
 		etat.start();
 		int compteur = 0;
@@ -82,7 +82,7 @@ public class Main {
 				//System.out.println(qualif);
 				double rm = random.nextGaussian()*rm_std_dev[degreQualif]+rm_mean[degreQualif];
 				double tl = random.nextGaussian()*tl_std_dev+tl_mean;
-				Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z, Math.random()*43.0};
+				Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z, 33.0};//Math.random()*43.0};
 				AgentController individu = mc.createNewAgent("individu "+compteur, "Individu", paramIndividu);
 				compteur++;
 				individu.start();
@@ -93,7 +93,7 @@ public class Main {
 		AgentController horloge = mc.createNewAgent("horloge", "Horloge", paramHorloge);
 		horloge.start();
 		
-		Object[] paramGenerateur = {random, nb_arrivants_moyen, nb_arrivants_std_dev, nb_initial,
+		Object[] paramGenerateur = {nb_arrivants_moyen, nb_arrivants_std_dev, nb_initial,
 									proportion_ouvriers, proportion_techniciens, proportion_cadres,
 									rm_mean, rm_std_dev, tl_mean, tl_std_dev,
 									x, y, z, mc};

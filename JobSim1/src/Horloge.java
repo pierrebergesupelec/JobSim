@@ -33,12 +33,6 @@ public class Horloge extends Agent{
 					
 					System.out.println("1 month has passed ( total = "+timeSimeStart+" ).");
 					
-					// TODO
-					System.out.println("Nombre d'inscrits* " + GenerateurIndividu.nb_inscrits);
-					System.out.println("Nombre de chômeurs* " + GenerateurIndividu.nb_chomeurs);
-					double taux = (GenerateurIndividu.nb_chomeurs*100.0)/GenerateurIndividu.nb_inscrits;
-					System.out.println("taux de chomage* :" + taux);
-					
 					// Maj de la liste de tous les agents
 					DFAgentDescription template = new DFAgentDescription();
 					ServiceDescription sd = new ServiceDescription();

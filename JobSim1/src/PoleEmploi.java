@@ -86,9 +86,9 @@ public class PoleEmploi extends Agent {
 							 addBehaviour(new donnerEmploi(e));
 						 }
 						 else{
-							 /*
+							 
 							 attente.add(e);
-							 addBehaviour(new donnerEmploi(e));*/
+							 addBehaviour(new donnerEmploi(e));
 							 if(pourvus.contains(e))	System.err.println("Erreur 1 protocole PoleEmploi!");
 							 if(attente.contains(e))	System.err.println("Erreur 2 protocole PoleEmploi!");
 						 }

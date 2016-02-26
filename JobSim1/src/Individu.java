@@ -23,7 +23,7 @@ public class Individu extends Agent{
 	}
 	
 	public Qualification qualif;
-	double rm;
+	public double rm;
 	double tl;
 	int moisSansTl;//nombre de mois que l'individu passe sans le temps libre souhaité
 	int moisSansEmploi;//nombre de mois sans emploi
@@ -393,12 +393,13 @@ public class Individu extends Agent{
 		// Deregister
 		try
 		{
+			// L'individu se retire de la classe de stat: Statistiques
+			Statistiques.removeIndividu(this);
 			DFService.deregister(this);
 		} catch (FIPAException fe) {
 			System.err.println("Can't deregister "+getLocalName()+"!");
 		}
-		// L'individu se retire de la classe de stat: Statistiques
-		Statistiques.removeIndividu(this);
+		
 		// Affichage
 		System.out.println(getLocalName()+" terminating.");
 	}

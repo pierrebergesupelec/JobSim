@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Random;
 
 import jade.core.Runtime;
@@ -10,7 +12,7 @@ import jade.wrapper.StaleProxyException;
 public class Main {
 
 
-	public static void main(String[] args) throws StaleProxyException {
+	public static void main(String[] args) throws StaleProxyException, FileNotFoundException {
 		// Parametres
 		
 		int pasHorloge = 200;
@@ -24,9 +26,10 @@ public class Main {
 		int nb_cadres = (int) (nb_initial*proportion_cadres);
 		int[] nbInitial = {nb_ouvriers,nb_techniciens,nb_cadres};
 		
-		int nbEmplois1 = (int) (nb_initial*proportion_ouvriers);
-		int nbEmplois2 = (int) (nb_initial*proportion_techniciens);
-		int nbEmplois3 = (int) (nb_initial*proportion_cadres);
+		double epsilon = 0;
+		int nbEmplois1 = (int) (nb_initial*(proportion_ouvriers-epsilon));
+		int nbEmplois2 = (int) (nb_initial*(proportion_techniciens-epsilon));
+		int nbEmplois3 = (int) (nb_initial*(proportion_cadres-epsilon));
 		
 		double r_1 = 1000;
 		double r_2 = 2000;
@@ -40,16 +43,17 @@ public class Main {
 		
 		int x = 3;
 		int y = 3;
-		double z = 0.10;
+		double z = 0.02;
 		
 		double tl_mean = 8;			// temps libre attendu assez faible -> situation stable
 		double tl_std_dev = 0;			// idem
 		double[] rm_mean = new double[]{1000, 2000, 3000};
 		double[] rm_std_dev = new double[]{200, 200, 200};
 		
-		int nb_arrivants_moyen = 0;
+		int nb_arrivants_moyen = 8;
 		double nb_arrivants_std_dev = 0;
 		
+		PrintWriter sortie = new PrintWriter("jobsim_rm_z" + z + ".txt");
 		
 		int seed = 10; 
 		Random random = new Random(seed);
@@ -66,7 +70,7 @@ public class Main {
 		AgentContainer mc = rt.createMainContainer(pMain);
 
 		// Classe qui s'occupe des statistiques sur les individus
-		AgentController statistiques = mc.createNewAgent("statistiques", "Statistiques", new Object[0]);
+		AgentController statistiques = mc.createNewAgent("statistiques", "Statistiques", new Object[]{sortie});
 		statistiques.start();
 		
 		AgentController poleEmploi = mc.createNewAgent("poleEmploi", "PoleEmploi", new Object[0]);
@@ -82,7 +86,7 @@ public class Main {
 				//System.out.println(qualif);
 				double rm = random.nextGaussian()*rm_std_dev[degreQualif]+rm_mean[degreQualif];
 				double tl = random.nextGaussian()*tl_std_dev+tl_mean;
-				Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z, 33.0};//Math.random()*43.0};
+				Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z, Math.random()*43.0};
 				AgentController individu = mc.createNewAgent("individu "+compteur, "Individu", paramIndividu);
 				compteur++;
 				individu.start();

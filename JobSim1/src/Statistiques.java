@@ -1,3 +1,4 @@
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import jade.core.Agent;
@@ -14,11 +15,19 @@ public class Statistiques extends Agent{
 
 	private static ArrayList<Individu> individus;
 	private static int monthsSinceStart = 0;
+	PrintWriter sortie;
+	int save_data_end = 12*40;
+	int compteur = 0;
 	
 	protected void setup() {
 		
 		individus = new ArrayList<Individu>();
 		monthsSinceStart = 0;
+		
+		Object[] args = getArguments();
+		if (args != null && args.length == 1) {
+			sortie = (PrintWriter) args[0];
+		}
 		
 		// Register "clock" service
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -59,13 +68,24 @@ public class Statistiques extends Agent{
 				monthsSinceStart ++;
 				// Taux de chomage
 				int nbChomeurs = 0;
+				double rm_moyen = 0;
 				for(Individu i : individus){
-					if(i.emploi == null)	nbChomeurs++;
+					if(i.emploi == null){
+						nbChomeurs++;
+					}
+					rm_moyen += i.rm;
 				}
-				System.out.println("Nombre d'inscrits : " + individus.size());
-				System.out.println("Nombre de chômeurs : " + nbChomeurs);
+				rm_moyen = rm_moyen / individus.size();
+				//System.out.println("Nombre d'inscrits : " + individus.size());
+				//System.out.println("Nombre de chômeurs : " + nbChomeurs);
 				double taux = (nbChomeurs*100.0)/individus.size();
 				System.out.println("Taux de chomage : " + taux + " %");
+				System.out.println("Revenu moyen exig� : " + rm_moyen + " ");
+				int rm_int = (int) (rm_moyen*100);
+				double rm_print = rm_int/100.0;
+				if (compteur < save_data_end) sortie.print(rm_print + " ");
+				if (compteur == save_data_end) sortie.close();
+				compteur++;
 			}
 			else {
 				block();

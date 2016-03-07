@@ -80,7 +80,7 @@ public class Statistiques extends Agent{
 				//System.out.println("Nombre de chômeurs : " + nbChomeurs);
 				double taux = (nbChomeurs*100.0)/individus.size();
 				System.out.println("Taux de chomage : " + taux + " %");
-				System.out.println("Revenu moyen exig� : " + rm_moyen + " ");
+				System.out.println("Revenu moyen exigé : " + rm_moyen + " ");
 				int rm_int = (int) (rm_moyen*100);
 				double rm_print = rm_int/100.0;
 				if (compteur < save_data_end) sortie.print(rm_print + " ");

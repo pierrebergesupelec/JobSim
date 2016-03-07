@@ -78,6 +78,7 @@ public class Etat extends Agent{
 			// Add behaviour
 			addBehaviour(new PublierEmplois());
 			addBehaviour(new Demission());
+
 		}
 		else {
 			// Make the agent terminate
@@ -91,7 +92,7 @@ public class Etat extends Agent{
 		@Override
 		public void action() {
 			for(Emploi e : emplois){
-				//System.out.println("Etat"+e); TODO
+				//System.out.println("Etat"+e);
 				// Message
 				ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 
@@ -126,7 +127,7 @@ public class Etat extends Agent{
 		
 		public void action() {
 			// Gérer le protocole de démission
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
+			MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),MessageTemplate.MatchConversationId("demission"));
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				// Gérer la démission
@@ -147,6 +148,7 @@ public class Etat extends Agent{
 					// Répondre à l'individu par une confirmation
 					ACLMessage reply = msg.createReply();
 					reply.setPerformative(ACLMessage.CONFIRM);
+					reply.setConversationId("demission");
 					reply.setContent("demission");
 					myAgent.send(reply);
 					
@@ -174,6 +176,7 @@ public class Etat extends Agent{
 					System.err.println("Erreur dans le protocole de démission (Etat) !!");
 					ACLMessage reply = msg.createReply();
 					reply.setPerformative(ACLMessage.FAILURE);
+					reply.setConversationId("demission");
 					reply.setContent("demission");
 					myAgent.send(reply);
 				}
@@ -183,7 +186,7 @@ public class Etat extends Agent{
 			}
 		}
 	}
-	
+
 	private class DemissionInformerPoleEmploi extends Behaviour {
 
 		private boolean terminate = false;
@@ -214,7 +217,7 @@ public class Etat extends Agent{
 				}
 				catch (FIPAException fe) {
 				fe.printStackTrace();
-				}// TODO
+				}
 				
 				// Informer PoleEmploi de la suppression de cet emploi (<-> démission)
 				ACLMessage oldJob = new ACLMessage(ACLMessage.INFORM);

@@ -168,7 +168,6 @@ public class Individu extends Agent{
 		}
 	}
 	
-	// TODO TODO
 	private class avecEmploiCDD extends Behaviour {
 		
 		private int duree = 0;
@@ -215,6 +214,13 @@ public class Individu extends Agent{
 						// Terminer ce behaviour
 						terminate = true;
 					}
+					// Quitter si le CDD atteint sa date de fin
+					if(duree == emploi.getDuree() && !terminate){
+						// Ajouter le behaviour de pour demander la prolongation du CDD en CDI
+						addBehaviour(new ProlongerCDD());
+						// Terminer ce behaviour
+						terminate = true;
+					}
 					//System.out.println(myAgent.getLocalName() + " Un mois de travail en plus: tlreel="+tl_reel+", tlindiv="+tl+", moisSansTl="+moisSansTl);
 				}
 			}
@@ -240,6 +246,81 @@ public class Individu extends Agent{
 		}
 	}
 	
+	// Behaviour pour le protocole de prolongation de CDD en CDI
+	private class ProlongerCDD extends Behaviour {
+		private int step = 0;//en tout 2 etapes : demande et attente de la réponse
+		private boolean terminate = false;//processus de décision terminé
+		
+		public void action() {
+			switch(step){
+			case 0:
+				// Envoie du message
+				ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
+				req.addReceiver(emploi.getEmployeur());
+				req.setContent(Integer.toString(emploi.getID()));
+				req.setConversationId("prolongation"); //TODO faire attention au nouveau protocole
+				myAgent.send(req);
+				step = 1;
+			case 1:
+				// Reception de la réponse
+				MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.MatchPerformative(ACLMessage.REFUSE));
+				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId("prolongation")); //TODO faire attention au nouveau protocole
+				ACLMessage msg = myAgent.receive(mt);
+				if(msg != null){
+					try {
+						if(msg.getPerformative()==ACLMessage.AGREE && msg.getContentObject() instanceof Emploi){
+							// Terminer ce behaviour
+							terminate = true;
+							// Mettre à jour l'emploi
+							emploi = (Emploi) msg.getContentObject();
+							// Ajouter le behaviour avecEmploi
+							if(emploi.getDuree() == Integer.MAX_VALUE){
+								// Cas CDI
+								addBehaviour(new avecEmploiCDI());
+							}
+							else{
+								// Cas CDD
+								addBehaviour(new avecEmploiCDD());
+							}
+						}
+						else{
+							// Réenregistrer "qualification" à l'annuaire Pour accéder aux offres d'emplois
+							DFAgentDescription dfd = new DFAgentDescription();
+							dfd.setName(getAID());
+							// Register "clock" service
+							dfd.addServices(sd);
+							// Register "worker" service
+							dfd.addServices(sd2);
+							// Register qualification service
+							dfd.addServices(sd3);
+							try {
+								DFService.modify(myAgent, dfd);
+							} catch (FIPAException e) {
+								e.printStackTrace();
+							}
+							
+							// Terminer ce behaviour
+							terminate = true;
+							// Supprime l'emploi de la mémoire de l'individu
+							emploi = null;
+							// Se mettre dans le behaviour sansEmploi
+							addBehaviour(new sansEmploi());
+						}
+					} catch (UnreadableException e) {
+						e.printStackTrace();
+					}
+				}
+				else{
+					block();
+				}
+			}
+		}
+
+		public boolean done() {
+			return terminate;
+		}
+	}
+	
 	// Behaviour pour le protocole de démission
 	private class Demissionner extends Behaviour {
 		private int step = 0;//en tout 2 etapes : demande et confirmation
@@ -256,16 +337,17 @@ public class Individu extends Agent{
 				ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
 				req.addReceiver(emploi.getEmployeur());
 				req.setContent(Integer.toString(emploi.getID()));
+				req.setConversationId("demission"); //TODO faire attention au nouveau protocole
 				myAgent.send(req);
 				step = 1;
 			case 1:
 				// Reception de la réponse
 				MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.CONFIRM), MessageTemplate.MatchPerformative(ACLMessage.FAILURE));
+				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId("demission")); //TODO faire attention au nouveau protocole
 				ACLMessage msg = myAgent.receive(mt);
 				if(msg != null){
 					if(msg.getPerformative()==ACLMessage.CONFIRM){
 						
-						//TODO
 						// Réenregistrer "qualification" à l'annuaire Pour accéder aux offres d'emplois
 						DFAgentDescription dfd = new DFAgentDescription();
 						dfd.setName(getAID());
@@ -320,11 +402,13 @@ public class Individu extends Agent{
 				ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
 				req.addReceiver(emploi.getEmployeur());
 				req.setContent(Integer.toString(emploi.getID()));
+				req.setConversationId("demission"); //TODO faire attention au nouveau protocole
 				myAgent.send(req);
 				step = 1;
 			case 1:
 				// Reception de la réponse
 				MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.CONFIRM), MessageTemplate.MatchPerformative(ACLMessage.FAILURE));
+				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId("demission")); //TODO faire attention au nouveau protocole
 				ACLMessage msg = myAgent.receive(mt);
 				if(msg != null){
 					if(msg.getPerformative()==ACLMessage.CONFIRM){
@@ -401,7 +485,6 @@ public class Individu extends Agent{
 								// RAZ offresRefusees
 								offresRefusees = 0;
 								
-								//TODO
 								// Retirer "qualification" de l'annuaire pour ne pas recevoir des offres d'emplois
 								DFAgentDescription dfd = new DFAgentDescription();
 								dfd.setName(getAID());

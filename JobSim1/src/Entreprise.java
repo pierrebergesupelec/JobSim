@@ -9,6 +9,8 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 public class Entreprise extends Agent {
 	
+	public static int[] dureeCDD = new int[]{3,6,12,24,36};
+	
 	int nbEmplois1;//contrairement à Etat, ce paramètre n'est pas fixe tout au long du processus.
 	int nbEmplois2;
 	int nbEmplois3;
@@ -34,6 +36,12 @@ public class Entreprise extends Agent {
 	//contraintes
 	int seuil_ouvriers;
 	int seuil_techniciens;
+	
+	//choix d'une durée de CDD
+	public int choix_duree_CDD(){
+		int index = (int) (Math.random()*dureeCDD.length);
+		return dureeCDD[index];
+	}
 	
 	protected void setup() {
 		// Initialisation message
@@ -61,18 +69,36 @@ public class Entreprise extends Agent {
 			seuil_techniciens = (int) args[16];
 			
 			// CrÃ©er les emplois
-			/*emplois = new ArrayList<Emploi>();
-			for(int i=0; i<nbEmplois1; i++){
+			emplois = new ArrayList<Emploi>();
+			
+			int nb_cdd1 = (int) (rapport_cdd_init*nbEmplois1);
+			int nb_cdi1 = nbEmplois1 - nb_cdd1;
+			for(int i=0; i<nb_cdd1; i++){
+				emplois.add(new Emploi(r1,tl1,tl_dev1,this.getAID(),Individu.Qualification.OUVRIER,choix_duree_CDD()));
+			}
+			for(int i=0; i<nb_cdi1; i++){
 				emplois.add(new Emploi(r1,tl1,tl_dev1,this.getAID(),Individu.Qualification.OUVRIER,Integer.MAX_VALUE));
 			}
-			for(int i=0; i<nbEmplois2; i++){
+			
+			int nb_cdd2 = (int) (rapport_cdd_init*nbEmplois2);
+			int nb_cdi2 = nbEmplois2 - nb_cdd2;
+			for(int i=0; i<nb_cdd2; i++){
+				emplois.add(new Emploi(r2,tl2,tl_dev2,this.getAID(),Individu.Qualification.TECHNICIEN,choix_duree_CDD()));
+			}
+			for(int i=0; i<nb_cdi2; i++){
 				emplois.add(new Emploi(r2,tl2,tl_dev2,this.getAID(),Individu.Qualification.TECHNICIEN,Integer.MAX_VALUE));
 			}
-			for(int i=0; i<nbEmplois3; i++){
-				emplois.add(new Emploi(r3,tl3,tl_dev3,this.getAID(),Individu.Qualification.CADRE,Integer.MAX_VALUE));
-			}*///TODO
 			
-			// Register "etat" service
+			int nb_cdd3 = (int) (rapport_cdd_init*nbEmplois3);
+			int nb_cdi3 = nbEmplois3 - nb_cdd3;
+			for(int i=0; i<nb_cdd3; i++){
+				emplois.add(new Emploi(r3,tl3,tl_dev3,this.getAID(),Individu.Qualification.CADRE,choix_duree_CDD()));
+			}
+			for(int i=0; i<nb_cdi3; i++){
+				emplois.add(new Emploi(r3,tl3,tl_dev3,this.getAID(),Individu.Qualification.CADRE,Integer.MAX_VALUE));
+			}
+			
+			// Register "entreprise" service
 			DFAgentDescription dfd = new DFAgentDescription();
 			dfd.setName(getAID());
 			ServiceDescription sd = new ServiceDescription();

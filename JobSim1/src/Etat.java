@@ -52,13 +52,13 @@ public class Etat extends Agent{
 			// Créer les emplois
 			emplois = new ArrayList<Emploi>();
 			for(int i=0; i<nbEmplois1; i++){
-				emplois.add(new Emploi(r1,tl1,tl_dev1,this.getAID(),Individu.Qualification.OUVRIER));
+				emplois.add(new Emploi(r1,tl1,tl_dev1,this.getAID(),Individu.Qualification.OUVRIER,Integer.MAX_VALUE));
 			}
 			for(int i=0; i<nbEmplois2; i++){
-				emplois.add(new Emploi(r2,tl2,tl_dev2,this.getAID(),Individu.Qualification.TECHNICIEN));
+				emplois.add(new Emploi(r2,tl2,tl_dev2,this.getAID(),Individu.Qualification.TECHNICIEN,Integer.MAX_VALUE));
 			}
 			for(int i=0; i<nbEmplois3; i++){
-				emplois.add(new Emploi(r3,tl3,tl_dev3,this.getAID(),Individu.Qualification.CADRE));
+				emplois.add(new Emploi(r3,tl3,tl_dev3,this.getAID(),Individu.Qualification.CADRE,Integer.MAX_VALUE));
 			}
 			
 			// Register "etat" service

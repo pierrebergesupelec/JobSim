@@ -12,6 +12,7 @@ public class Emploi implements Serializable {
 	private double revenu;
 	private double tl_reel;
 	private double tl_std_dev;
+	private int duree;
 	
 	private int ID;
 	private AID employeur;
@@ -20,12 +21,13 @@ public class Emploi implements Serializable {
 	
 	private Random random;
 	
-	public Emploi(double r, double tl, double tl_dev, AID empl, Individu.Qualification q){
+	public Emploi(double r, double tl, double tl_dev, AID empl, Individu.Qualification q, int d){
 		revenu = r;
 		tl_reel = tl;
 		tl_std_dev = tl_dev;
 		employeur = empl;
 		qualif = q;
+		duree = d;
 		ID = idgenerator;
 		idgenerator ++;
 		random = new Random();
@@ -38,6 +40,7 @@ public class Emploi implements Serializable {
 		tl_std_dev = e.tl_std_dev;
 		employeur = e.getEmployeur();
 		qualif = e.getQualif();
+		duree = e.duree;
 		random = new Random();
 	}
 	

@@ -62,6 +62,10 @@ public class Emploi implements Serializable {
 		return revenu;
 	}
 	
+	public double getDuree(){
+		return duree;
+	}
+	
 	public double tlRealisation(){
 		//TODO à tester?? 
 		// random.nextGaussian()*tl_std_dev+tl_reel

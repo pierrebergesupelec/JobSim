@@ -104,7 +104,7 @@ public class Individu extends Agent{
 		}
 	}
 	
-	private class avecEmploi extends Behaviour {
+	private class avecEmploiCDI extends Behaviour {
 		
 		private boolean terminate = false;
 		
@@ -137,7 +137,79 @@ public class Individu extends Agent{
 						moisSansTl = 0;
 					}
 					// Vérifier la condition sur le tl et quitter éventuellement
-					if(moisSansTl>=x){
+					if(moisSansTl>=x && !terminate){
+						// Ajouter le behaviour demissionner
+						addBehaviour(new Demissionner());
+						// Terminer ce behaviour
+						terminate = true;
+					}
+					//System.out.println(myAgent.getLocalName() + " Un mois de travail en plus: tlreel="+tl_reel+", tlindiv="+tl+", moisSansTl="+moisSansTl);
+				}
+			}
+			if(condition2){
+				ACLMessage answer = msg_e.createReply();
+				answer.setPerformative(ACLMessage.REJECT_PROPOSAL);
+				try {
+					answer.setConversationId(Integer.toString(((Emploi)msg_e.getContentObject()).getID()));
+					answer.setContentObject(msg_e.getContentObject());
+					//System.out.println(myAgent.getLocalName()+": "+(Emploi)msg_e.getContentObject()+" refusé, car déjà employé.");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				myAgent.send(answer);
+			}
+			if(!condition1 && !condition2) {
+				block();
+			}
+		}
+		
+		public boolean done() {
+			return terminate;
+		}
+	}
+	
+	// TODO TODO
+	private class avecEmploiCDD extends Behaviour {
+		
+		private int duree = 0;
+		private boolean terminate = false;
+		
+		public void onStart(){
+			duree = 0;
+		}
+		
+		public void action() {
+			// clock msg
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+			ACLMessage msg = myAgent.receive(mt);
+			// Proposition d'emploi msg -> renvoyer un refu
+			MessageTemplate mt_e = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
+			ACLMessage msg_e = myAgent.receive(mt_e);
+			// Conditions
+			boolean condition1 = msg != null && msg.getContent().equals("clock");
+			boolean condition2 = msg_e != null;
+			if (condition1) {
+				// +1 mois de cotisation pour la retraite
+				annees_cotisation += (1.0/12.0);
+				if (annees_cotisation > depart_retraite){	//depart à la retraite
+					terminate = true;
+					addBehaviour(new DepartRetraite());
+				}
+				// +1 mois duree depuis début du travail
+				duree ++;
+				// Vérifier que l'individu a un emploi
+				if(emploi!=null){
+					// Obtenir le temps libre de ce mois pour cet emploi 
+					double tl_reel = emploi.tlRealisation();
+					// Mettre à jour le nombre de mois avec un temps libre < tl
+					if(tl_reel<tl){
+						moisSansTl ++;
+					}
+					else{
+						moisSansTl = 0;
+					}
+					// Vérifier la condition sur le tl et quitter éventuellement
+					if(moisSansTl>=x && !terminate){
 						// Ajouter le behaviour demissionner
 						addBehaviour(new Demissionner());
 						// Terminer ce behaviour
@@ -316,7 +388,14 @@ public class Individu extends Agent{
 								emploi = e;
 								emploi.setEmploye(getAID());
 								// Ajouter le behaviour avecEmploi
-								addBehaviour(new avecEmploi());
+								if(emploi.getDuree() == Integer.MAX_VALUE){
+									// Cas CDI
+									addBehaviour(new avecEmploiCDI());
+								}
+								else{
+									// Cas CDD
+									addBehaviour(new avecEmploiCDD());
+								}
 								// Terminer ce behaviour
 								terminate = true;
 								// RAZ offresRefusees

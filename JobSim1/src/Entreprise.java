@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -33,6 +35,11 @@ public class Entreprise extends Agent {
 	double dmd_dev;
 	double rapport_cdd_init;//proportion initiale de CDD
 	
+	//productivité de chaque qualification
+	double prod1;
+	double prod2;
+	double prod3;
+	
 	//contraintes
 	int seuil_ouvriers;
 	int seuil_techniciens;
@@ -49,7 +56,7 @@ public class Entreprise extends Agent {
 
 		// Get the parameters
 		Object[] args = getArguments();
-		if (args != null && args.length == 17) {
+		if (args != null && args.length == 20) {
 			nbEmplois1 = (int) args[0];
 			nbEmplois2 = (int) args[1];
 			nbEmplois3 = (int) args[2];
@@ -67,6 +74,10 @@ public class Entreprise extends Agent {
 			rapport_cdd_init = (double) args[14];
 			seuil_ouvriers = (int) args[15];
 			seuil_techniciens = (int) args[16];
+			prod1 = (double) args[17];
+			prod2 = (double) args[18];
+			prod3 = (double) args[19];
+			
 			
 			// CrÃ©er les emplois
 			emplois = new ArrayList<Emploi>();
@@ -113,13 +124,29 @@ public class Entreprise extends Agent {
 			}
 			
 			// Add behaviour
-			//TODO
+			addBehaviour(new Comptabilite());
 
 		}
 		else {
 			// Make the agent terminate
 			System.out.println("Entreprise is not correctly initialised.");
 			doDelete();
+		}
+	}
+	
+	//Behaviour qui s'occupe chaque mois de calculer la production, la demande et d'établir le nombre de nouvelles embauches si besoin
+	private class Comptabilite extends Behaviour{
+
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public boolean done() {
+			// TODO Auto-generated method stub
+			return false;
 		}
 	}
 

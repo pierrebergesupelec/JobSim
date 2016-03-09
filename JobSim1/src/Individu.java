@@ -258,13 +258,13 @@ public class Individu extends Agent{
 				ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
 				req.addReceiver(emploi.getEmployeur());
 				req.setContent(Integer.toString(emploi.getID()));
-				req.setConversationId("prolongation"); //TODO faire attention au nouveau protocole
+				req.setConversationId("prolongation");
 				myAgent.send(req);
 				step = 1;
 			case 1:
 				// Reception de la réponse
 				MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.MatchPerformative(ACLMessage.REFUSE));
-				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId("prolongation")); //TODO faire attention au nouveau protocole
+				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId("prolongation"));
 				ACLMessage msg = myAgent.receive(mt);
 				if(msg != null){
 					try {
@@ -337,13 +337,13 @@ public class Individu extends Agent{
 				ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
 				req.addReceiver(emploi.getEmployeur());
 				req.setContent(Integer.toString(emploi.getID()));
-				req.setConversationId("demission"); //TODO faire attention au nouveau protocole
+				req.setConversationId("demission");
 				myAgent.send(req);
 				step = 1;
 			case 1:
 				// Reception de la réponse
 				MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.CONFIRM), MessageTemplate.MatchPerformative(ACLMessage.FAILURE));
-				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId("demission")); //TODO faire attention au nouveau protocole
+				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId("demission"));
 				ACLMessage msg = myAgent.receive(mt);
 				if(msg != null){
 					if(msg.getPerformative()==ACLMessage.CONFIRM){
@@ -402,13 +402,13 @@ public class Individu extends Agent{
 				ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
 				req.addReceiver(emploi.getEmployeur());
 				req.setContent(Integer.toString(emploi.getID()));
-				req.setConversationId("demission"); //TODO faire attention au nouveau protocole
+				req.setConversationId("demission");
 				myAgent.send(req);
 				step = 1;
 			case 1:
 				// Reception de la réponse
 				MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.CONFIRM), MessageTemplate.MatchPerformative(ACLMessage.FAILURE));
-				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId("demission")); //TODO faire attention au nouveau protocole
+				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId("demission"));
 				ACLMessage msg = myAgent.receive(mt);
 				if(msg != null){
 					if(msg.getPerformative()==ACLMessage.CONFIRM){

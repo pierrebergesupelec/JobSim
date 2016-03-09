@@ -41,6 +41,7 @@ public class Emploi implements Serializable {
 		employeur = e.getEmployeur();
 		qualif = e.getQualif();
 		duree = e.duree;
+		ID = e.ID;
 		random = new Random();
 	}
 	
@@ -66,9 +67,11 @@ public class Emploi implements Serializable {
 		return duree;
 	}
 	
+	public void setDuree(int d){
+		duree = d;
+	}
+	
 	public double tlRealisation(){
-		//TODO à tester?? 
-		// random.nextGaussian()*tl_std_dev+tl_reel
 		return new Random().nextGaussian()*tl_std_dev+tl_reel;
 	}
 

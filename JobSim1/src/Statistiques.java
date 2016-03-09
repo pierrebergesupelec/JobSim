@@ -76,8 +76,8 @@ public class Statistiques extends Agent{
 					rm_moyen += i.rm;
 				}
 				rm_moyen = rm_moyen / individus.size();
-				//System.out.println("Nombre d'inscrits : " + individus.size());
-				//System.out.println("Nombre de chômeurs : " + nbChomeurs);
+				System.out.println("Nombre d'inscrits : " + individus.size());
+				System.out.println("Nombre de chômeurs : " + nbChomeurs);
 				double taux = (nbChomeurs*100.0)/individus.size();
 				System.out.println("Taux de chomage : " + taux + " %");
 				System.out.println("Revenu moyen exigé : " + rm_moyen + " ");

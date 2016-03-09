@@ -155,21 +155,8 @@ public class Etat extends Agent{
 					// Supprimer le champs "employe" de l'emploie
 					e.setEmploye(null);
 					
-					// poleEmploi est le destinataire des messages suivants
-					AID poleEmploi = new AID();
-					DFAgentDescription template = new DFAgentDescription();
-					ServiceDescription sd = new ServiceDescription();
-					sd.setType("poleemploi");
-					template.addServices(sd);
-					try {
-						DFAgentDescription[] result = DFService.search(myAgent, template);
-						poleEmploi = result[0].getName();
-					}
-					catch (FIPAException fe) {
-					fe.printStackTrace();
-					}
-					
-					addBehaviour(new DemissionInformerPoleEmploi(e,poleEmploi));
+					// Informer PoleEmploi de la démission
+					addBehaviour(new DemissionInformerPoleEmploi(e));
 				}
 				else{
 					// Répondre par une erreur
@@ -195,9 +182,8 @@ public class Etat extends Agent{
 		private AID poleEmploi;
 		private int step = 0;
 		
-		public DemissionInformerPoleEmploi(Emploi emploi, AID pe){
+		public DemissionInformerPoleEmploi(Emploi emploi){
 			e = emploi;
-			poleEmploi = pe;
 			step = 0;
 		}
 		

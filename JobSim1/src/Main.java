@@ -53,6 +53,22 @@ public class Main {
 		int nb_arrivants_moyen = 8;
 		double nb_arrivants_std_dev = 0;
 		
+		// Paramètres "entreprises"
+		int nbEntreprises = 1;
+		double a = 1.2;
+		double b = 0.8;
+		double c = 1;
+		double d = 0.7;
+		int m = 5;
+		double prod1 = 1100;
+		double prod2 = 2200;
+		double prod3 = 3300;
+		double dmd_dev = 100;
+		double rapport_cdd_init = 0.3;
+		int seuil_ouvriers = 10;
+		int seuil_techniciens = 10;
+		double alpha = ((prod1+prod2+prod3)*nbEntreprises)/3.0;
+		
 		PrintWriter sortie = new PrintWriter("jobsim_rm_z" + z + ".txt");
 		
 		int seed = 10; 
@@ -76,9 +92,11 @@ public class Main {
 		AgentController poleEmploi = mc.createNewAgent("poleEmploi", "PoleEmploi", new Object[0]);
 		poleEmploi.start();
 		
+		/*
 		Object[] paramEtat = new Object[]{nbEmplois1 ,nbEmplois2, nbEmplois3,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3};
 		AgentController etat = mc.createNewAgent("etat", "Etat", paramEtat);
 		etat.start();
+		*/
 		int compteur = 0;
 		for(int degreQualif=0; degreQualif<nbInitial.length; degreQualif++){
 			for(int i=0; i<nbInitial[degreQualif]; i++){
@@ -104,6 +122,12 @@ public class Main {
 		AgentController generateur = mc.createNewAgent("generateurIndividu", "GenerateurIndividu", paramGenerateur);
 		generateur.start();
 		
+		for(int i=0; i<nbEntreprises; i++){
+			Object[] paramE = new Object[]{10,10,10,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3,alpha,dmd_dev,rapport_cdd_init,
+					seuil_ouvriers,seuil_techniciens,prod1,prod2,prod3,a,b,c,d,m};
+			AgentController e = mc.createNewAgent("entreprise "+i, "Entreprise", paramE);
+			e.start();
+		}
 	}
 
 }

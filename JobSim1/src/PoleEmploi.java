@@ -183,6 +183,35 @@ public class PoleEmploi extends Agent {
 						attente.remove(e);
 						step = 2;
 						terminate = true;
+						
+						// Récupérer l'AID de l'état
+						// condition = (pas d'etat dans le système) OU (l'employeur n'est pas l'état) 
+						boolean condition = false;
+						DFAgentDescription template1 = new DFAgentDescription();
+						ServiceDescription sd1 = new ServiceDescription();
+						sd1.setType("etat");
+						template1.addServices(sd1);
+						DFAgentDescription[] result = null;
+						try {
+							result = DFService.search(myAgent, template1);
+							if(result==null)			condition = true;
+							else if(result.length==0)	condition = true;
+							else						condition = e.getEmployeur()!=result[0].getName();
+						} catch (FIPAException e2) {
+							e2.printStackTrace();
+						}
+						// Envoyer une notification à l'entreprise (si l'employeur est bien une entreprise) pour qu'il mette à jour sa liste d'emplois
+						if(condition){
+							ACLMessage msgE = new ACLMessage(ACLMessage.INFORM_REF);
+							try {
+								msgE.setContentObject(e);
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+							msgE.setConversationId("emploiPourvu");
+							msgE.addReceiver(e.getEmployeur());
+							myAgent.send(msgE);
+						}
 					}
 					if (reply.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
 						step = 0;

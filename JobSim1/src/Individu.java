@@ -371,6 +371,7 @@ public class Individu extends Agent{
 						addBehaviour(new sansEmploi());
 					}
 					else{
+						System.err.println(myAgent.getLocalName()+" Erreur Demissionner.");
 						step = 0;
 					}
 				}

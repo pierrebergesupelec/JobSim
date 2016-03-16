@@ -13,6 +13,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
 
 
 public class Entreprise extends Agent {
@@ -126,12 +127,12 @@ public class Entreprise extends Agent {
 			int nb_cdi1 = nbEmplois1_i - nb_cdd1;
 			for(int i=0; i<nb_cdd1; i++){
 				Emploi e = new Emploi(r1,tl1,tl_dev1,this.getAID(),Individu.Qualification.OUVRIER,choix_duree_CDD());
-				emplois.add(e);
+				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			for(int i=0; i<nb_cdi1; i++){
 				Emploi e = new Emploi(r1,tl1,tl_dev1,this.getAID(),Individu.Qualification.OUVRIER,Integer.MAX_VALUE);
-				emplois.add(e);
+				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			
@@ -139,12 +140,12 @@ public class Entreprise extends Agent {
 			int nb_cdi2 = nbEmplois2_i - nb_cdd2;
 			for(int i=0; i<nb_cdd2; i++){
 				Emploi e = new Emploi(r2,tl2,tl_dev2,this.getAID(),Individu.Qualification.TECHNICIEN,choix_duree_CDD());
-				emplois.add(e);
+				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			for(int i=0; i<nb_cdi2; i++){
 				Emploi e = new Emploi(r2,tl2,tl_dev2,this.getAID(),Individu.Qualification.TECHNICIEN,Integer.MAX_VALUE);
-				emplois.add(e);
+				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			
@@ -152,12 +153,12 @@ public class Entreprise extends Agent {
 			int nb_cdi3 = nbEmplois3_i - nb_cdd3;
 			for(int i=0; i<nb_cdd3; i++){
 				Emploi e = new Emploi(r3,tl3,tl_dev3,this.getAID(),Individu.Qualification.CADRE,choix_duree_CDD());
-				emplois.add(e);
+				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			for(int i=0; i<nb_cdi3; i++){
 				Emploi e = new Emploi(r3,tl3,tl_dev3,this.getAID(),Individu.Qualification.CADRE,Integer.MAX_VALUE);
-				emplois.add(e);
+				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			
@@ -179,12 +180,38 @@ public class Entreprise extends Agent {
 			addBehaviour(new Comptabilite());
 			addBehaviour(new Demission());
 			addBehaviour(new ProlongationCDD());
+			addBehaviour(new majListEmplois());
 
 		}
 		else {
 			// Make the agent terminate
 			System.out.println("Entreprise is not correctly initialised.");
 			doDelete();
+		}
+	}
+	
+	// Met à jour la liste d'emploi, lorsqu'il reçoit une notification de PoleEmploi ("emploiPourvu"):
+	private class majListEmplois extends CyclicBehaviour{
+
+		@Override
+		public void action() {
+			// "emploiPourvu" msg
+			MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM_REF),MessageTemplate.MatchConversationId("emploiPourvu"));
+			ACLMessage msg = myAgent.receive(mt);
+			if(msg != null){ 
+				try {
+					if(msg.getContentObject() instanceof Emploi){
+						emplois.add(((Emploi)msg.getContentObject()));
+					}else{
+						System.err.println("Erreur dans majListEmplois : l'objet reçu par notification de PoleEmploi (\"emploiPourvu\") n'est pas de type Emploi.");
+					}
+				} catch (UnreadableException e) {
+					e.printStackTrace();
+				}
+			}
+			else{
+				block();
+			}
 		}
 	}
 	
@@ -200,7 +227,6 @@ public class Entreprise extends Agent {
 			if(msg != null && msg.getContent().equals("clock")){ 
 				// Calculer demande
 				dmd = alpha*Statistiques.getIndividus().size()+dmd_dev*random.nextGaussian();
-				System.out.println("Demande : "+dmd); //TODO
 				// Calcul production
 				int nbEmplois1 = 0;
 				int nbEmplois2 = 0;
@@ -211,7 +237,8 @@ public class Entreprise extends Agent {
 					if(e.getQualif().equals(Individu.Qualification.OUVRIER))	nbEmplois1++;
 				}
 				prod = prod1*nbEmplois1+prod2*nbEmplois2+prod3*nbEmplois3;
-				System.out.println("Production : "+prod); //TODO
+				int total = nbEmplois1+nbEmplois2+nbEmplois3; //TODO
+				System.out.println(myAgent.getLocalName()+", Demande : "+dmd+", Production : "+prod+", "+total+" embauches."); //TODO
 				// Lancer la création d'emplois
 				addBehaviour(new CreerEmplois(nbEmplois1,nbEmplois2,nbEmplois3));
 			}
@@ -368,8 +395,6 @@ public class Entreprise extends Agent {
 					Emploi e = new Emploi(r,tl1,tl_dev1,myAgent.getAID(),q,Integer.MAX_VALUE);
 					// Envoyer la proposition à PoleEmploi
 					addBehaviour(new Publier1Emploi(e,poleEmploi));
-					// Mettre à jour emplois
-					emplois.add(e);
 				}
 			}
 			
@@ -392,8 +417,6 @@ public class Entreprise extends Agent {
 					Emploi e = new Emploi(r,tl1,tl_dev1,myAgent.getAID(),q,choix_duree_CDD());
 					// Envoyer la proposition à PoleEmploi
 					addBehaviour(new Publier1Emploi(e,poleEmploi));
-					// Mettre à jour emplois
-					emplois.add(e);
 				}
 			}
 		}
@@ -467,7 +490,8 @@ public class Entreprise extends Agent {
 				}
 				else{
 					// Répondre par une erreur
-					System.err.println("Erreur dans le protocole de démission (Etat) !!");
+					//TODO
+					System.err.println(myAgent.getLocalName()+" : Erreur dans le protocole de démission, emploi "+msg.getContent()+" not found!");
 					ACLMessage reply = msg.createReply();
 					reply.setPerformative(ACLMessage.FAILURE);
 					reply.setConversationId("demission");

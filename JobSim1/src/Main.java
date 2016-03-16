@@ -54,7 +54,7 @@ public class Main {
 		double nb_arrivants_std_dev = 0;
 		
 		// Paramètres "entreprises"
-		int nbEntreprises = 1;
+		int nbEntreprises = 10;
 		double a = 1.2;
 		double b = 0.8;
 		double c = 1;
@@ -67,7 +67,7 @@ public class Main {
 		double rapport_cdd_init = 0.3;
 		int seuil_ouvriers = 10;
 		int seuil_techniciens = 10;
-		double alpha = ((prod1+prod2+prod3)*nbEntreprises)/3.0;
+		double alpha = (prod1+prod2+prod3)/3.0/10;//((prod1+prod2+prod3)*nbEntreprises)/3.0; //TODO j'ai fixé alpha!!
 		
 		PrintWriter sortie = new PrintWriter("jobsim_rm_z" + z + ".txt");
 		
@@ -92,11 +92,25 @@ public class Main {
 		AgentController poleEmploi = mc.createNewAgent("poleEmploi", "PoleEmploi", new Object[0]);
 		poleEmploi.start();
 		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		} 
+		
 		/*
 		Object[] paramEtat = new Object[]{nbEmplois1 ,nbEmplois2, nbEmplois3,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3};
 		AgentController etat = mc.createNewAgent("etat", "Etat", paramEtat);
 		etat.start();
 		*/
+		
+		for(int i=0; i<nbEntreprises; i++){
+			Object[] paramE = new Object[]{10,10,10,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3,alpha,dmd_dev,rapport_cdd_init,
+					seuil_ouvriers,seuil_techniciens,prod1,prod2,prod3,a,b,c,d,m};
+			AgentController e = mc.createNewAgent("entreprise "+i, "Entreprise", paramE);
+			e.start();
+		}
+		
 		int compteur = 0;
 		for(int degreQualif=0; degreQualif<nbInitial.length; degreQualif++){
 			for(int i=0; i<nbInitial[degreQualif]; i++){
@@ -111,10 +125,6 @@ public class Main {
 			}
 		}
 		
-		Object[] paramHorloge = new Object[]{pasHorloge};
-		AgentController horloge = mc.createNewAgent("horloge", "Horloge", paramHorloge);
-		horloge.start();
-		
 		Object[] paramGenerateur = {nb_arrivants_moyen, nb_arrivants_std_dev, nb_initial,
 									proportion_ouvriers, proportion_techniciens, proportion_cadres,
 									rm_mean, rm_std_dev, tl_mean, tl_std_dev,
@@ -122,12 +132,9 @@ public class Main {
 		AgentController generateur = mc.createNewAgent("generateurIndividu", "GenerateurIndividu", paramGenerateur);
 		generateur.start();
 		
-		for(int i=0; i<nbEntreprises; i++){
-			Object[] paramE = new Object[]{10,10,10,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3,alpha,dmd_dev,rapport_cdd_init,
-					seuil_ouvriers,seuil_techniciens,prod1,prod2,prod3,a,b,c,d,m};
-			AgentController e = mc.createNewAgent("entreprise "+i, "Entreprise", paramE);
-			e.start();
-		}
+		Object[] paramHorloge = new Object[]{pasHorloge};
+		AgentController horloge = mc.createNewAgent("horloge", "Horloge", paramHorloge);
+		horloge.start();
 	}
 
 }

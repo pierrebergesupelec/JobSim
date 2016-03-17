@@ -85,10 +85,10 @@ public class Main {
 		//seuils
 		int seuil_ouvriers = 10;//nombre d'ouvriers pour avoir au moins 1 technicien
 		int seuil_techniciens = 10;//nombre de techniciens pour avoir au moins 1 cadre
-		double alpha = (prod1+prod2+prod3)/30.0;
+		double alpha = (prod1+prod2+prod3)/25.0;
 		
 		//pour stocker des résultats
-		PrintWriter sortie = new PrintWriter("jobsim_rm_z" + z + ".txt");
+		PrintWriter sortie = new PrintWriter("jobsim_classic.txt");
 		
 		int seed = 10; 
 		Random random = new Random(seed);

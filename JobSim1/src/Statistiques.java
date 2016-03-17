@@ -95,9 +95,9 @@ public class Statistiques extends Agent{
 				System.out.println("Embauches Etat : " + emploisPubliques);
 				System.out.println("Embauches privées : " + emploisPrives);
 				// ----------------
-				int rm_int = (int) (rm_moyen*100);
-				double rm_print = rm_int/100.0;
-				if (compteur < save_data_end) sortie.print(rm_print + " ");
+				int taux_int = (int) (taux*100);
+				double taux_print = taux_int/100.0;
+				if (compteur < save_data_end) sortie.print(taux_print + " ");
 				if (compteur == save_data_end) sortie.close();
 				compteur++;
 			}

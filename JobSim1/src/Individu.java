@@ -36,6 +36,9 @@ public class Individu extends Agent{
 	
 	public static double depart_retraite = 43.0;
 	
+	boolean politique2cdd = false;
+	int indexCDD = 0;
+	
 	Emploi emploi = null;
 	
 	// "clock" service
@@ -216,10 +219,15 @@ public class Individu extends Agent{
 					}
 					// Quitter si le CDD atteint sa date de fin
 					if(duree == emploi.getDuree() && !terminate){
-						// Ajouter le behaviour de pour demander la prolongation du CDD en CDI
-						addBehaviour(new ProlongerCDD());
-						// Terminer ce behaviour
-						terminate = true;
+						if (!politique2cdd || (politique2cdd && indexCDD<2)){
+							// Ajouter le behaviour de pour demander la prolongation du CDD en CDI
+							addBehaviour(new ProlongerCDD());
+							// Terminer ce behaviour
+							terminate = true;
+						} else {
+							emploi = null;
+							terminate = true;
+						}
 					}
 					//System.out.println(myAgent.getLocalName() + " Un mois de travail en plus: tlreel="+tl_reel+", tlindiv="+tl+", moisSansTl="+moisSansTl);
 				}
@@ -259,8 +267,12 @@ public class Individu extends Agent{
 				req.addReceiver(emploi.getEmployeur());
 				req.setContent(Integer.toString(emploi.getID()));
 				req.setConversationId("prolongation");
-				myAgent.send(req);
-				step = 1;
+				if (politique2cdd && indexCDD>1) {
+					terminate = true;
+				} else {
+					myAgent.send(req);
+					step = 1;
+				}
 			case 1:
 				// Reception de la réponse
 				MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.MatchPerformative(ACLMessage.REFUSE));

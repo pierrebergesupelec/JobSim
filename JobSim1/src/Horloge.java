@@ -30,7 +30,8 @@ public class Horloge extends Agent{
 				protected void onTick() {
 					
 					timeSimeStart ++;
-					
+					System.out.println("------------------------------------------------------------------------------------------------------");
+					System.out.println("");
 					System.out.println("1 month has passed ( total = "+timeSimeStart+" ) -----------------------------------------------------");
 					
 					// Maj de la liste de tous les agents

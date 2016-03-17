@@ -19,42 +19,53 @@ public class Main {
 		// Il faut donc augmenter le pasHorloge pour donner le temps aux agents de traiter ces messages
 		int pasHorloge = 1000;
 		
+		//proportion de chaque catégorie
 		double proportion_ouvriers = 0.4;
 		double proportion_techniciens = 0.3;
 		double proportion_cadres = 0.3;
+		
+		//nombre d'employés
 		int nb_initial = 320;
 		int nb_ouvriers = (int) (nb_initial*proportion_ouvriers);
 		int nb_techniciens = (int) (nb_initial*proportion_techniciens);
 		int nb_cadres = (int) (nb_initial*proportion_cadres);
 		int[] nbInitial = {nb_ouvriers,nb_techniciens,nb_cadres};
 		
-		double proportionEmploiPublique = 0.3; // (nb emplois publiques) / (population initiable)
-		double epsilon = 0;
-		int nbEmplois1 = (int) (nb_initial*(proportion_ouvriers-epsilon)*proportionEmploiPublique);
-		int nbEmplois2 = (int) (nb_initial*(proportion_techniciens-epsilon)*proportionEmploiPublique);
-		int nbEmplois3 = (int) (nb_initial*(proportion_cadres-epsilon)*proportionEmploiPublique);
+		//proportion d'emplois publics sur la masse totale d'emplois
+		double proportionEmploiPublique = 0.5; // (nb emplois publiques) / (population initiable)
 		
-		double r_1 = 1100;	// salaire un peu plus Ã©levÃ© que la moyenne demandÃ©e initialement 
-		double r_2 = 2200;
-		double r_3 = 3300;
+		//nombre d'emplois publics
+		int nbEmplois1 = (int) (nb_initial*(proportion_ouvriers)*proportionEmploiPublique);//nombre de fonctionnaires ouvriers
+		int nbEmplois2 = (int) (nb_initial*(proportion_techniciens)*proportionEmploiPublique);//nombre de fonctionnaires techniciens
+		int nbEmplois3 = (int) (nb_initial*(proportion_cadres)*proportionEmploiPublique);//nombre de fonctionnaires cadres
+		
+		//revenus des employés dans le public par catégorie
+		double r_1 = 1200;// salaire un peu plus Ã©levÃ© que la moyenne demandÃ©e initialement 
+		double r_2 = 2300;
+		double r_3 = 3500;
+		//temps libre moyen des fonctionnaires selon leur catégorie
 		double e_tl1 = 10;
 		double e_tl2 = 10;
 		double e_tl3 = 10;
+		//écart type du temps libre des fonctionnaires selon leur catégorie
 		double e_tl_dev1 = 2;
 		double e_tl_dev2 = 2;
 		double e_tl_dev3 = 2;
 		
+		//paramètres x, y, z
 		int x = 3;
 		int y = 3;
 		double z = 0.02;
 		
-		double tl_mean = 8;			// temps libre attendu assez faible -> situation stable
-		double tl_std_dev = 0;			// idem
-		double[] rm_mean = new double[]{1000, 2000, 3000};
-		double[] rm_std_dev = new double[]{200, 200, 200};
+		//exigences des salariés
+		double tl_mean = 8;	// temps libre attendu assez faible -> situation stable
+		double tl_std_dev = 0;
+		double[] rm_mean = new double[]{1000, 2000, 3000};//moyenne des salaires attendus
+		double[] rm_std_dev = new double[]{50, 100, 200};//écart type des salaires attendus
 		
-		int nb_arrivants_moyen = 8;
-		double nb_arrivants_std_dev = 0;
+		//arrivants chaque année
+		int nb_arrivants_moyen = 8;//nombre d'arrivants moyen chaque année
+		double nb_arrivants_std_dev = 0;//écart-type du nombre d'arrivants chaque année
 		
 		// ParamÃ¨tres "entreprises"
 		int nbEntreprises = 3;
@@ -63,15 +74,20 @@ public class Main {
 		double c = 1;
 		double d = 0.7;
 		int m = 5;
+		//productivité de chaque catégorie en entreprise
 		double prod1 = 1100;
 		double prod2 = 2200;
 		double prod3 = 3300;
+		//écart-type de la demande
 		double dmd_dev = 100;
+		//proportion de cdd au départ
 		double rapport_cdd_init = 0.3;
-		int seuil_ouvriers = 10;
-		int seuil_techniciens = 10;
-		double alpha = (prod1+prod2+prod3)/3.0/10;//((prod1+prod2+prod3)*nbEntreprises)/3.0; //TODO j'ai fixÃ© alpha!!
+		//seuils
+		int seuil_ouvriers = 10;//nombre d'ouvriers pour avoir au moins 1 technicien
+		int seuil_techniciens = 10;//nombre de techniciens pour avoir au moins 1 cadre
+		double alpha = (prod1+prod2+prod3)/30.0;
 		
+		//pour stocker des résultats
 		PrintWriter sortie = new PrintWriter("jobsim_rm_z" + z + ".txt");
 		
 		int seed = 10; 
@@ -117,7 +133,6 @@ public class Main {
 		for(int degreQualif=0; degreQualif<nbInitial.length; degreQualif++){
 			for(int i=0; i<nbInitial[degreQualif]; i++){
 				Individu.Qualification qualif = Individu.Qualification.values()[degreQualif];
-				//System.out.println(qualif);
 				double rm = random.nextGaussian()*rm_std_dev[degreQualif]+rm_mean[degreQualif];
 				double tl = random.nextGaussian()*tl_std_dev+tl_mean;
 				Object[] paramIndividu = new Object[]{qualif, rm, tl, x, y, z, Math.random()*43.0};

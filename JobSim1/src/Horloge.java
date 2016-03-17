@@ -31,7 +31,7 @@ public class Horloge extends Agent{
 					
 					timeSimeStart ++;
 					
-					System.out.println("1 month has passed ( total = "+timeSimeStart+" ).");
+					System.out.println("1 month has passed ( total = "+timeSimeStart+" ) -----------------------------------------------------");
 					
 					// Maj de la liste de tous les agents
 					DFAgentDescription template = new DFAgentDescription();

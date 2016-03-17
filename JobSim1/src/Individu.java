@@ -264,6 +264,7 @@ public class Individu extends Agent{
 			case 1:
 				// Reception de la réponse
 				MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.MatchPerformative(ACLMessage.REFUSE));
+				mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.FAILURE),mt);
 				mt = MessageTemplate.and(mt, MessageTemplate.MatchConversationId("prolongation"));
 				ACLMessage msg = myAgent.receive(mt);
 				if(msg != null){
@@ -283,7 +284,7 @@ public class Individu extends Agent{
 								addBehaviour(new avecEmploiCDD());
 							}
 						}
-						else{
+						else if(msg.getPerformative()==ACLMessage.REFUSE){
 							// Réenregistrer "qualification" à l'annuaire Pour accéder aux offres d'emplois
 							DFAgentDescription dfd = new DFAgentDescription();
 							dfd.setName(getAID());
@@ -305,6 +306,10 @@ public class Individu extends Agent{
 							emploi = null;
 							// Se mettre dans le behaviour sansEmploi
 							addBehaviour(new sansEmploi());
+						}
+						else{
+							//System.err.println("Cas failure");
+							step = 0;
 						}
 					} catch (UnreadableException e) {
 						e.printStackTrace();
@@ -371,7 +376,7 @@ public class Individu extends Agent{
 						addBehaviour(new sansEmploi());
 					}
 					else{
-						System.err.println(myAgent.getLocalName()+" Erreur Demissionner.");
+						//System.err.println(myAgent.getLocalName()+" Erreur Demissionner.");
 						step = 0;
 					}
 				}

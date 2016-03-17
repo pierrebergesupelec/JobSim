@@ -15,7 +15,9 @@ public class Main {
 	public static void main(String[] args) throws StaleProxyException, FileNotFoundException {
 		// Parametres
 		
-		int pasHorloge = 200;
+		// Lorsque le nombre d'entreprises est élevé, il peut y avoir surcharge des messages transmis
+		// Il faut donc augmenter le pasHorloge pour donner le temps aux agents de traiter ces messages
+		int pasHorloge = 1000;
 		
 		double proportion_ouvriers = 0.4;
 		double proportion_techniciens = 0.3;
@@ -26,14 +28,15 @@ public class Main {
 		int nb_cadres = (int) (nb_initial*proportion_cadres);
 		int[] nbInitial = {nb_ouvriers,nb_techniciens,nb_cadres};
 		
+		double proportionEmploiPublique = 0.3; // (nb emplois publiques) / (population initiable)
 		double epsilon = 0;
-		int nbEmplois1 = (int) (nb_initial*(proportion_ouvriers-epsilon));
-		int nbEmplois2 = (int) (nb_initial*(proportion_techniciens-epsilon));
-		int nbEmplois3 = (int) (nb_initial*(proportion_cadres-epsilon));
+		int nbEmplois1 = (int) (nb_initial*(proportion_ouvriers-epsilon)*proportionEmploiPublique);
+		int nbEmplois2 = (int) (nb_initial*(proportion_techniciens-epsilon)*proportionEmploiPublique);
+		int nbEmplois3 = (int) (nb_initial*(proportion_cadres-epsilon)*proportionEmploiPublique);
 		
-		double r_1 = 1000;
-		double r_2 = 2000;
-		double r_3 = 3000;
+		double r_1 = 1100;	// salaire un peu plus élevé que la moyenne demandée initialement 
+		double r_2 = 2200;
+		double r_3 = 3300;
 		double e_tl1 = 10;
 		double e_tl2 = 10;
 		double e_tl3 = 10;
@@ -54,7 +57,7 @@ public class Main {
 		double nb_arrivants_std_dev = 0;
 		
 		// Paramètres "entreprises"
-		int nbEntreprises = 10;
+		int nbEntreprises = 3;
 		double a = 1.2;
 		double b = 0.8;
 		double c = 1;
@@ -98,11 +101,10 @@ public class Main {
 			e1.printStackTrace();
 		} 
 		
-		/*
 		Object[] paramEtat = new Object[]{nbEmplois1 ,nbEmplois2, nbEmplois3,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3};
+		// Ne pas changer le nom de l'Etat "etat". Car le module de statistiques utilise cela.
 		AgentController etat = mc.createNewAgent("etat", "Etat", paramEtat);
 		etat.start();
-		*/
 		
 		for(int i=0; i<nbEntreprises; i++){
 			Object[] paramE = new Object[]{10,10,10,r_1,r_2,r_3,e_tl1,e_tl2,e_tl3,e_tl_dev1,e_tl_dev2,e_tl_dev3,alpha,dmd_dev,rapport_cdd_init,

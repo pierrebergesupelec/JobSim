@@ -1,6 +1,7 @@
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -60,6 +61,7 @@ public class Statistiques extends Agent{
 	}
 
 	private class stats extends CyclicBehaviour{
+		
 		public void action() {
 			// clock msg
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
@@ -69,9 +71,17 @@ public class Statistiques extends Agent{
 				// Taux de chomage
 				int nbChomeurs = 0;
 				double rm_moyen = 0;
+				int emploisPubliques = 0;
+				int emploisPrives = 0;
 				for(Individu i : individus){
 					if(i.emploi == null){
 						nbChomeurs++;
+					}
+					else{
+						if(i.emploi.getEmployeur().getLocalName().equals("etat")){
+							emploisPubliques++;
+						}
+						else	emploisPrives++;
 					}
 					rm_moyen += i.rm;
 				}
@@ -81,6 +91,10 @@ public class Statistiques extends Agent{
 				double taux = (nbChomeurs*100.0)/individus.size();
 				System.out.println("Taux de chomage : " + taux + " %");
 				System.out.println("Revenu moyen exigé : " + rm_moyen + " ");
+				// Stats sur l'Etat
+				System.out.println("Embauches Etat : " + emploisPubliques);
+				System.out.println("Embauches privées : " + emploisPrives);
+				// ----------------
 				int rm_int = (int) (rm_moyen*100);
 				double rm_print = rm_int/100.0;
 				if (compteur < save_data_end) sortie.print(rm_print + " ");

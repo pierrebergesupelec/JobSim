@@ -34,13 +34,13 @@ public class Entreprise extends Agent {
 	double tl_dev3;
 	ArrayList<Emploi> emplois;
 	
-	//Dans notre mod�le, la moyenne de la demande est proportionnelle au nombre d'individus.
+	//Dans notre modèle, la moyenne de la demande est proportionnelle au nombre d'individus.
 	double dmd;
 	// Production
 	double prod;
-	//Le coefficient de proportionnalit� entre dmd et nombre d'individus est not� alpha
+	//Le coefficient de proportionnalité entre dmd et nombre d'individus est not� alpha
 	double alpha;
-	//On fixe seulement l'�cart-type au d�part.
+	//On fixe seulement l'écart-type au départ.
 	double dmd_dev;
 	double rapport_cdd_init;//proportion initiale de CDD
 	
@@ -65,7 +65,7 @@ public class Entreprise extends Agent {
 	// Générateur
 	private Random random;
 	
-	//choix d'une dur�e de CDD
+	//choix d'une durée de CDD
 	public int choix_duree_CDD(){
 		int index = (int) (Math.random()*dureeCDD.length);
 		return dureeCDD[index];
@@ -103,7 +103,7 @@ public class Entreprise extends Agent {
 			c = (double) args[22];
 			d = (double) args[23];
 			m = (int) args[24];
-			
+
 			// Initialiser générateur
 			random = new Random();
 			
@@ -127,12 +127,10 @@ public class Entreprise extends Agent {
 			int nb_cdi1 = nbEmplois1_i - nb_cdd1;
 			for(int i=0; i<nb_cdd1; i++){
 				Emploi e = new Emploi(r1,tl1,tl_dev1,this.getAID(),Individu.Qualification.OUVRIER,choix_duree_CDD());
-				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			for(int i=0; i<nb_cdi1; i++){
 				Emploi e = new Emploi(r1,tl1,tl_dev1,this.getAID(),Individu.Qualification.OUVRIER,Integer.MAX_VALUE);
-				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			
@@ -140,12 +138,10 @@ public class Entreprise extends Agent {
 			int nb_cdi2 = nbEmplois2_i - nb_cdd2;
 			for(int i=0; i<nb_cdd2; i++){
 				Emploi e = new Emploi(r2,tl2,tl_dev2,this.getAID(),Individu.Qualification.TECHNICIEN,choix_duree_CDD());
-				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			for(int i=0; i<nb_cdi2; i++){
 				Emploi e = new Emploi(r2,tl2,tl_dev2,this.getAID(),Individu.Qualification.TECHNICIEN,Integer.MAX_VALUE);
-				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			
@@ -153,12 +149,10 @@ public class Entreprise extends Agent {
 			int nb_cdi3 = nbEmplois3_i - nb_cdd3;
 			for(int i=0; i<nb_cdd3; i++){
 				Emploi e = new Emploi(r3,tl3,tl_dev3,this.getAID(),Individu.Qualification.CADRE,choix_duree_CDD());
-				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			for(int i=0; i<nb_cdi3; i++){
 				Emploi e = new Emploi(r3,tl3,tl_dev3,this.getAID(),Individu.Qualification.CADRE,Integer.MAX_VALUE);
-				//emplois.add(e);//TODO
 				addBehaviour(new Publier1Emploi(e,poleEmploi));
 			}
 			
@@ -237,7 +231,7 @@ public class Entreprise extends Agent {
 					if(e.getQualif().equals(Individu.Qualification.OUVRIER))	nbEmplois1++;
 				}
 				prod = prod1*nbEmplois1+prod2*nbEmplois2+prod3*nbEmplois3;
-				int total = nbEmplois1+nbEmplois2+nbEmplois3; //TODO
+				int total = nbEmplois1+nbEmplois2+nbEmplois3;
 				System.out.println(myAgent.getLocalName()+", Demande : "+dmd+", Production : "+prod+", "+total+" embauches."); //TODO
 				// Lancer la création d'emplois
 				addBehaviour(new CreerEmplois(nbEmplois1,nbEmplois2,nbEmplois3));
@@ -327,16 +321,12 @@ public class Entreprise extends Agent {
 				}
 				else{
 					// Répondre par un refus (cas d'erreur: l'emploi n'est pas trouvé)
-					System.err.println("Erreur dans le protocole de prolongationCDD : "+myAgent.getLocalName()+" !!");
+					//System.err.println("Failure dans le protocole de prolongationCDD : "+myAgent.getLocalName()+" !!");
 					ACLMessage reply = msg.createReply();
-					reply.setPerformative(ACLMessage.REFUSE);
+					reply.setPerformative(ACLMessage.FAILURE);
 					reply.setConversationId("prolongation");
 					reply.setContent("prolongation");
 					myAgent.send(reply);
-					// Informer PoleEmploi de la fin de l'emploi e
-					addBehaviour(new DemissionInformerPoleEmploi(e));
-					// Mettre à jour la liste "emplois"
-					emplois.remove(e);
 				}
 			}
 			else{
@@ -490,8 +480,7 @@ public class Entreprise extends Agent {
 				}
 				else{
 					// Répondre par une erreur
-					//TODO
-					System.err.println(myAgent.getLocalName()+" : Erreur dans le protocole de démission, emploi "+msg.getContent()+" not found!");
+					//System.err.println(myAgent.getLocalName()+" : Erreur dans le protocole de démission, emploi "+msg.getContent()+" not found!");
 					ACLMessage reply = msg.createReply();
 					reply.setPerformative(ACLMessage.FAILURE);
 					reply.setConversationId("demission");
@@ -535,7 +524,7 @@ public class Entreprise extends Agent {
 				catch (FIPAException fe) {
 				fe.printStackTrace();
 				}
-				
+				//System.err.println("Test surcharge 1/3");//TODO
 				// Informer PoleEmploi de la suppression de cet emploi (<-> démission)
 				ACLMessage oldJob = new ACLMessage(ACLMessage.INFORM);
 				oldJob.addReceiver(poleEmploi);
@@ -556,6 +545,7 @@ public class Entreprise extends Agent {
 				ACLMessage msg = myAgent.receive(mt);
 				if(msg != null){
 					terminate = true;
+					//System.err.println("Test surcharge 3/3");//TODO
 				}
 				else{
 					block();

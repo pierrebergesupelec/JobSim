@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -28,12 +29,12 @@ public class PoleEmploi extends Agent {
 		pourvus = new ArrayList<Emploi>();
 		attente = new ArrayList<Emploi>();
 		
-		// Register "etat" service
+		// Register "poleemploi" service
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType("poleemploi");
-		sd.setName("");
+		sd.setName(getName());
 		dfd.addServices(sd);
 		try {
 			DFService.register(this, dfd);
@@ -41,7 +42,7 @@ public class PoleEmploi extends Agent {
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
-		
+
 		addBehaviour(new maj());
 		
 	}
@@ -60,6 +61,7 @@ public class PoleEmploi extends Agent {
 			 if (msg != null) {
 				 // msg de démission (suppression de l'emploi)
 				 if (msg.getPerformative() == ACLMessage.INFORM) {
+					 //System.err.println("Test surcharge 2/3");//TODO
 					 try {
 						 // Répondre à l'Etat par une confirmation
 						 ACLMessage reply = msg.createReply();
@@ -99,6 +101,20 @@ public class PoleEmploi extends Agent {
 				 
 				 // TODO
 				 /*
+				 System.out.println("=================== pourvus "+pourvus.size());
+				 ArrayList<Emploi> tmp = new ArrayList(pourvus);
+				 tmp.sort(new Comparator<Emploi>() {
+				        public int compare(Emploi e1, Emploi e2)
+				        {
+				            return  e1.getID()-e2.getID();
+				        }
+				    });
+				 for(Emploi e : tmp){
+					 System.out.println(e);
+				 }
+				 System.out.println("=================== attente "+attente.size());
+				 */
+				 /*
 				 System.out.println("=================== pourvus ===============");
 				 for(Emploi e : pourvus){
 					 System.out.println(e);
@@ -123,48 +139,85 @@ public class PoleEmploi extends Agent {
 		int step = 0;
 		Emploi e = null;	//Emploi à traiter
 		AID AIDtravailleur;
+		// Pour un emploi proposé par une entreprise, la supprimer au bout de maxCompteur propositions refusées.
+		// De telle sorte:
+		//	* il y a moins de surcharge de messages et processus en même temps 
+		// 	* cela permet aussi de supprimer les propositions que personne ne veux (par exemple avec un salaire proposé bcp trop faible)
+		// Si compteur = -1, cela signifie que c'est un emploi public, donc pas de limite.
+		int compteur; 
+		int maxCompteur = 3;
 		
 		public donnerEmploi(Emploi emploi){
 			e = emploi;
+			compteur = 0;
+		}
+		
+		public void onStart(){
+			// Récupérer l'AID de l'état
+			DFAgentDescription template1 = new DFAgentDescription();
+			ServiceDescription sd1 = new ServiceDescription();
+			sd1.setType("etat");
+			template1.addServices(sd1);
+			DFAgentDescription[] result = null;
+			try {
+				result = DFService.search(myAgent, template1);
+				if(result!=null){
+					// Si l'employeur est l'état alors fixer compteur=-1 et ne jamais le changer
+					if(result.length!=0 && result[0].getName()==e.getEmployeur())	compteur = -1;
+				}
+			} catch (FIPAException e2) {
+				e2.printStackTrace();
+			}
 		}
 		
 		@Override
 		public void action() {
 			switch (step){
 			case 0:
-				//Message à envoyé
-				ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
+				// Pour un emploi proposé par une entreprise, la supprimer au bout de maxCompteur propositions refusées
+				if(compteur>=maxCompteur){
+					attente.remove(e);
+					terminate = true;
+				}
+				else{
+					//Message à envoyé
+					ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
 
-				//liste de destinataires : tous les travailleurs avec la bonne qualification
-				AID[] travailleurs = new AID[0];
-				DFAgentDescription template = new DFAgentDescription();
-				ServiceDescription sd = new ServiceDescription();
-				sd.setType(e.getQualif().name());
-				template.addServices(sd);
-				try {
-					DFAgentDescription[] result = DFService.search(myAgent, template);
-					travailleurs = new AID[result.length];
-					for (int i = 0; i < result.length; ++i) {
-						travailleurs[i] = result[i].getName();
-					}
-				}
-				catch (FIPAException fe) {
-					fe.printStackTrace();
-				}
-				if(travailleurs.length > 0){
-					//choix d'un destinataire au pif
-					int i = (int) (Math.random()*travailleurs.length);
-					msg.addReceiver(travailleurs[i]);
-					AIDtravailleur = travailleurs[i];
-					//System.out.println("Pole Emploi envoie une proposition "+e+" à " + travailleurs[i].getLocalName());
-					//Envoi des informations relatives à l'emploi
+					//liste de destinataires : tous les travailleurs avec la bonne qualification
+					AID[] travailleurs = new AID[0];
+					DFAgentDescription template = new DFAgentDescription();
+					ServiceDescription sd = new ServiceDescription();
+					sd.setType(e.getQualif().name());
+					template.addServices(sd);
 					try {
-						msg.setContentObject(e);// PJ
-					} catch (IOException e1) {
-						e1.printStackTrace();
+						DFAgentDescription[] result = DFService.search(myAgent, template);
+						travailleurs = new AID[result.length];
+						for (int i = 0; i < result.length; ++i) {
+							travailleurs[i] = result[i].getName();
+						}
 					}
-					myAgent.send(msg);
-					step = 1;
+					catch (FIPAException fe) {
+						fe.printStackTrace();
+					}
+					if(travailleurs.length > 0){
+						//choix d'un destinataire au pif
+						int i = (int) (Math.random()*travailleurs.length);
+						msg.addReceiver(travailleurs[i]);
+						AIDtravailleur = travailleurs[i];
+						//System.out.println("Pole Emploi envoie une proposition "+e+" à " + travailleurs[i].getLocalName());
+						//Envoi des informations relatives à l'emploi
+						try {
+							msg.setContentObject(e);// PJ
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+						myAgent.send(msg);
+						step = 1;
+
+						// Incrémente le compteur du nombre de propositions
+						// Sauf pour un emploi publique
+						if(compteur != -1)	compteur ++;
+					}
 				}
 				break;
 			case 1:
